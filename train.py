@@ -12,6 +12,8 @@ GRID_SIZE = 10
 xs, nexts = generators.generate_dataset(N=20000, grid_size=GRID_SIZE)
 ys = nexts - xs
 
+print(xs[:10], ys[:10])
+
 xs = xs.astype(int)
 ys = ys.astype(int)
 
@@ -68,7 +70,7 @@ test_dataset = preprocess_test(tf.data.Dataset.from_tensor_slices(x_test))
 
 model.fit(train_dataset,
           validation_data=val_dataset, 
-          epochs=3,
+          epochs=5,
           steps_per_epoch=1000,
           callbacks=callbacks)
 
