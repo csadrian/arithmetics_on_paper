@@ -6,6 +6,7 @@ import tensorflow_datasets as tfds
 
 SIGN_ADD = 11
 SIGN_SUB = 12
+SIGN_IS_PRIME = 13
 GRID_SIZE = 10
 
 
@@ -85,6 +86,39 @@ class SubstractPlayer:
         x, y = self.paper.print_number(c, x, y, step_by_step=True)
 
 
+class IsPrimePlayer:
+
+    def __init__(self, paper):
+        self.paper = paper
+
+    def is_prime(self, x):
+        if x < 2:
+            return False
+        else:
+            for n in range(2,x):
+                if x % n == 0:
+                   return False
+            return True
+
+    def play(self, a):
+
+        start = (random.randint(4,6), random.randint(4,6))
+        x, y = start
+
+        x, y = self.paper.print_number(a, x, y)
+        self.paper.print_symbol(SIGN_IS_PRIME, x, y)
+        x, y = x + 1, start[1]
+        self.paper.make_step()
+
+        if self.is_prime(a):
+            self.paper.print_number(1, x, y)
+        else:
+            self.paper.print_number(0, x, y)
+
+        self.paper.make_step()
+
+
+
 def generate_dataset(N=1000, grid_size=10):
     xs, ys = [], []
     for i in range(N):
@@ -107,6 +141,18 @@ def generate_dataset(N=1000, grid_size=10):
         paper = PaperWithNumbers(grid_size)
         player = SubstractPlayer(paper)
         player.play(a, b)
+        steps = paper.get_steps()
+
+        for first, second in zip(steps, steps[1:]):
+            xs.append(first)
+            ys.append(second)
+
+    for i in range(N):
+        a = random.randint(1, 33)
+
+        paper = PaperWithNumbers(grid_size)
+        player = IsPrimePlayer(paper)
+        player.play(a)
         steps = paper.get_steps()
 
         for first, second in zip(steps, steps[1:]):
