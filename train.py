@@ -6,13 +6,13 @@ import tensorflow_datasets as tfds
 
 import generators
 
-SIGN_ADD = 11
-GRID_SIZE = 10
+NUM_SYMBOLS = 18
+GRID_SIZE = 12
 
 xs, nexts = generators.generate_dataset(N=20000, grid_size=GRID_SIZE)
 ys = nexts - xs
 
-print(xs[:10], ys[:10])
+print(xs[:GRID_SIZE], ys[:GRID_SIZE])
 
 xs = xs.astype(int)
 ys = ys.astype(int)
@@ -27,13 +27,13 @@ x_test = xs[20000:30000]
 y_test = ys[20000:30000]
 
 # Instantiate a simple classification model
-inp = tf.keras.layers.Input(shape=(GRID_SIZE, GRID_SIZE, 13))
+inp = tf.keras.layers.Input(shape=(GRID_SIZE, GRID_SIZE, NUM_SYMBOLS))
 
 out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(inp)
 out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
-out = layers.Conv2D(13, (3,3), padding='same')(out)
+out = layers.Conv2D(NUM_SYMBOLS, (3,3), padding='same')(out)
 
 model = tf.keras.Model(inputs=inp, outputs=out)
 
@@ -56,12 +56,12 @@ callbacks = [tf.keras.callbacks.ModelCheckpoint(filepath='my_model.keras',
 
 def preprocess(ds):
     ds = ds.batch(50)
-    ds = ds.map(lambda x, y: (tf.one_hot(x, 13, axis=-1), tf.one_hot(y, 13, axis=-1)))
+    ds = ds.map(lambda x, y: (tf.one_hot(x, NUM_SYMBOLS, axis=-1), tf.one_hot(y, NUM_SYMBOLS, axis=-1)))
     return ds
 
 def preprocess_test(ds):
     ds = ds.batch(50)
-    ds = ds.map(lambda x: tf.one_hot(x, 13, axis=-1))
+    ds = ds.map(lambda x: tf.one_hot(x, NUM_SYMBOLS, axis=-1))
     return ds
 
 train_dataset = preprocess(tf.data.Dataset.from_tensor_slices((x_train, y_train))).repeat()
@@ -70,7 +70,7 @@ test_dataset = preprocess_test(tf.data.Dataset.from_tensor_slices(x_test))
 
 model.fit(train_dataset,
           validation_data=val_dataset, 
-          epochs=5,
+          epochs=10,
           steps_per_epoch=1000,
           callbacks=callbacks)
 

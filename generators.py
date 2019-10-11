@@ -7,6 +7,10 @@ import tensorflow_datasets as tfds
 SIGN_ADD = 11
 SIGN_SUB = 12
 SIGN_IS_PRIME = 13
+SIGN_IS_DIVISIBLE_BY = 14
+SIGN_FACTORIZE = 15
+SIGN_DIV = 16
+
 GRID_SIZE = 10
 
 
@@ -32,8 +36,16 @@ class PaperWithNumbers:
             n //= b
         return digits[::-1]
 
+
+    def print_symbols_ltr(self, ns, x, y):
+        for n in ns:
+            self.paper[x][y] = n
+            y += 1
+        return x, y
+
     def print_symbol(self, n, x, y):
         self.paper[x][y] = n
+        return x, y-1
 
     def print_number(self, n, x, y, step_by_step=False):
         n_in_base = self.number_to_base(n)
@@ -119,6 +131,83 @@ class IsPrimePlayer:
 
 
 
+class IsDivisibleByPlayer:
+
+    def __init__(self, limit):
+        self.paper = None
+        self.limit = limit
+
+    def set_paper(self, paper):
+        self.paper = paper
+
+    def generate(self, data_split=None):
+        a = random.randint(1, self.limit)
+        b = random.randint(1, self.limit)
+        a, b = max(a, b), min(a, b)
+        self.play(a,b)
+        return self.paper.get_steps()
+
+    def play(self, a, b):
+
+        start = (random.randint(4,6), random.randint(4,6))
+        x, y = start
+
+        x, y = self.paper.print_number(b, x, y)
+        x, y = self.paper.print_symbol(SIGN_IS_DIVISIBLE_BY, x, y)
+        x, y = self.paper.print_number(a, x, y)
+
+        x, y = x + 1, start[1]
+        self.paper.make_step()
+
+        if a % b == 0:
+            self.paper.print_number(1, x, y)
+        else:
+            self.paper.print_number(0, x, y)
+
+        self.paper.make_step()
+
+
+class FactorizePlayer:
+
+    def __init__(self, limit):
+        self.paper = None
+        self.limit = limit
+
+    def set_paper(self, paper):
+        self.paper = paper
+
+    def generate(self, data_split=None):
+        a = random.randint(1, self.limit)
+        self.play(a)
+        return self.paper.get_steps()
+
+    def play(self, a):
+
+        primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53]
+
+        start = (random.randint(4,6), random.randint(4,6))
+        x, y = start
+
+        x, y = self.paper.print_number(a, x, y)
+        x, y = self.paper.print_symbol(SIGN_FACTORIZE, x, y)
+
+        #x, y = self.paper.print_number(a, x, y)
+        x, y = x + 1, start[1]
+        i = 0
+        factor = primes[i]
+        while a != 1:
+            while (a % factor == 0) and (a != 1):
+                print(a)
+                y = start[1]-3
+                x, y = self.paper.print_symbols_ltr(self.paper.number_to_base(a) + [SIGN_DIV] + self.paper.number_to_base(factor), x, y)
+                self.paper.make_step()
+                x, y = x + 1, start[1]
+                a = a // factor
+            i += 1
+            factor = primes[i]
+        self.paper.make_step()
+
+
 def generate_dataset(N=1000, grid_size=10):
     xs, ys = [], []
     for i in range(N):
@@ -158,6 +247,21 @@ def generate_dataset(N=1000, grid_size=10):
         for first, second in zip(steps, steps[1:]):
             xs.append(first)
             ys.append(second)
+
+    generators = [
+        IsDivisibleByPlayer(limit=20),
+        IsDivisibleByPlayer(limit=50),
+        FactorizePlayer(limit=50),
+    ]
+
+    for generator in generators:
+        for i in range(N):
+            paper = PaperWithNumbers(grid_size)
+            generator.set_paper(paper)
+            steps = generator.generate()
+            for first, second in zip(steps, steps[1:]):
+                xs.append(first)
+                ys.append(second)
 
     xs = np.array(xs)
     ys = np.array(ys)
