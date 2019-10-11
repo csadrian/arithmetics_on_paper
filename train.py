@@ -9,24 +9,12 @@ import generators
 NUM_SYMBOLS = 18
 GRID_SIZE = 12
 
-xs, nexts = generators.generate_dataset(N=20000, grid_size=GRID_SIZE)
-ys = nexts - xs
+x_train, y_train = generators.generate_dataset(N=20000, grid_size=GRID_SIZE)
+x_val  , y_val   = generators.generate_dataset(N=10000, grid_size=GRID_SIZE)
+x_test , y_test  = generators.generate_dataset(N=10000, grid_size=GRID_SIZE)
 
-print(xs[:GRID_SIZE], ys[:GRID_SIZE])
 
-xs = xs.astype(int)
-ys = ys.astype(int)
 
-print(xs.shape, ys.shape)
-
-x_train = xs[:20000]
-y_train = ys[:20000]
-
-x_val = xs[20000:30000]
-y_val = ys[20000:30000]
-
-x_test = xs[30000:40000]
-y_test = ys[30000:40000]
 
 # Instantiate a simple classification model
 inp = tf.keras.layers.Input(shape=(GRID_SIZE, GRID_SIZE, NUM_SYMBOLS))

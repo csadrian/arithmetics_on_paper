@@ -249,5 +249,5 @@ def generate_dataset(N=1000, grid_size=10):
     ys = np.array(ys)
 
     p = np.random.permutation(len(xs))
-    xs, ys = xs[p], ys[p]
-    return xs, ys
+    xs, ys = xs[p].astype(int), ys[p].astype(int)
+    return xs, ys-xs
