@@ -17,19 +17,22 @@ print(xs[:GRID_SIZE], ys[:GRID_SIZE])
 xs = xs.astype(int)
 ys = ys.astype(int)
 
-x_train = xs[:10000]
-y_train = ys[:10000]
+print(xs.shape, ys.shape)
 
-x_val = xs[10000:20000]
-y_val = ys[10000:20000]
+x_train = xs[:20000]
+y_train = ys[:20000]
 
-x_test = xs[20000:30000]
-y_test = ys[20000:30000]
+x_val = xs[20000:30000]
+y_val = ys[20000:30000]
+
+x_test = xs[30000:40000]
+y_test = ys[30000:40000]
 
 # Instantiate a simple classification model
 inp = tf.keras.layers.Input(shape=(GRID_SIZE, GRID_SIZE, NUM_SYMBOLS))
 
 out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(inp)
+out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)

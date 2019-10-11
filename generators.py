@@ -56,10 +56,23 @@ class PaperWithNumbers:
         return x, y-len(n_in_base)
 
 
-class AddPlayer:
-
-    def __init__(self, paper):
+class Solver:
+    def set_paper(self, paper):
         self.paper = paper
+
+    def get_steps(self):
+        return self.paper.get_steps()
+
+
+class AddSolver(Solver):
+
+    def __init__(self, a_limits, b_limits):
+        self.a_limits, self.b_limits = a_limits, b_limits
+
+    def generate(self):
+        a = random.randint(self.a_limits[0], self.a_limits[1])
+        b = random.randint(self.b_limits[0], self.b_limits[1])
+        return self.play(a, b)
 
     def play(self, a, b):
 
@@ -77,10 +90,15 @@ class AddPlayer:
         x, y = self.paper.print_number(c, x, y, step_by_step=True)
 
 
-class SubstractPlayer:
+class SubstractSolver(Solver):
 
-    def __init__(self, paper):
-        self.paper = paper
+    def __init__(self, a_limits, b_limits):
+        self.a_limits, self.b_limits = a_limits, b_limits
+
+    def generate(self):
+        a = random.randint(self.a_limits[0], self.a_limits[1])
+        b = random.randint(self.b_limits[0], self.b_limits[1])
+        return self.play(a, b)
 
     def play(self, a, b):
 
@@ -98,10 +116,10 @@ class SubstractPlayer:
         x, y = self.paper.print_number(c, x, y, step_by_step=True)
 
 
-class IsPrimePlayer:
+class IsPrimeSolver(Solver):
 
-    def __init__(self, paper):
-        self.paper = paper
+    def __init__(self, limit):
+        self.limit = limit
 
     def is_prime(self, x):
         if x < 2:
@@ -111,6 +129,10 @@ class IsPrimePlayer:
                 if x % n == 0:
                    return False
             return True
+
+    def generate(self):
+        a = random.randint(1, self.limit)
+        return self.play(a)
 
     def play(self, a):
 
@@ -131,14 +153,11 @@ class IsPrimePlayer:
 
 
 
-class IsDivisibleByPlayer:
+class IsDivisibleBySolver(Solver):
 
     def __init__(self, limit):
         self.paper = None
         self.limit = limit
-
-    def set_paper(self, paper):
-        self.paper = paper
 
     def generate(self, data_split=None):
         a = random.randint(1, self.limit)
@@ -167,14 +186,11 @@ class IsDivisibleByPlayer:
         self.paper.make_step()
 
 
-class FactorizePlayer:
+class FactorizeSolver(Solver):
 
     def __init__(self, limit):
         self.paper = None
         self.limit = limit
-
-    def set_paper(self, paper):
-        self.paper = paper
 
     def generate(self, data_split=None):
         a = random.randint(1, self.limit)
@@ -197,7 +213,6 @@ class FactorizePlayer:
         factor = primes[i]
         while a != 1:
             while (a % factor == 0) and (a != 1):
-                print(a)
                 y = start[1]-3
                 x, y = self.paper.print_symbols_ltr(self.paper.number_to_base(a) + [SIGN_DIV] + self.paper.number_to_base(factor), x, y)
                 self.paper.make_step()
@@ -210,55 +225,22 @@ class FactorizePlayer:
 
 def generate_dataset(N=1000, grid_size=10):
     xs, ys = [], []
-    for i in range(N):
-        a = random.randint(100, 500)
-        b = random.randint(100, 500)
-
-        paper = PaperWithNumbers(grid_size)
-        player = AddPlayer(paper)
-        player.play(a, b)
-        steps = paper.get_steps()
-
-        for first, second in zip(steps, steps[1:]):
-            xs.append(first)
-            ys.append(second)
-
-    for i in range(N):
-        a = random.randint(500, 900)
-        b = random.randint(100, 400)
-
-        paper = PaperWithNumbers(grid_size)
-        player = SubstractPlayer(paper)
-        player.play(a, b)
-        steps = paper.get_steps()
-
-        for first, second in zip(steps, steps[1:]):
-            xs.append(first)
-            ys.append(second)
-
-    for i in range(N):
-        a = random.randint(1, 33)
-
-        paper = PaperWithNumbers(grid_size)
-        player = IsPrimePlayer(paper)
-        player.play(a)
-        steps = paper.get_steps()
-
-        for first, second in zip(steps, steps[1:]):
-            xs.append(first)
-            ys.append(second)
-
+    
     generators = [
-        IsDivisibleByPlayer(limit=20),
-        IsDivisibleByPlayer(limit=50),
-        FactorizePlayer(limit=50),
+        AddSolver(a_limits=(100, 500), b_limits=(100, 500)),
+        SubstractSolver(a_limits=(500, 900), b_limits=(100, 400)),
+        IsPrimeSolver(limit=33),
+        IsDivisibleBySolver(limit=20),
+        IsDivisibleBySolver(limit=50),
+        FactorizeSolver(limit=50),
     ]
 
     for generator in generators:
         for i in range(N):
             paper = PaperWithNumbers(grid_size)
             generator.set_paper(paper)
-            steps = generator.generate()
+            generator.generate()
+            steps = generator.get_steps()
             for first, second in zip(steps, steps[1:]):
                 xs.append(first)
                 ys.append(second)
