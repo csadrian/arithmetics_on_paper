@@ -13,6 +13,7 @@ x_train, y_train = generators.generate_dataset(N=20000, grid_size=GRID_SIZE)
 x_val  , y_val   = generators.generate_dataset(N=10000, grid_size=GRID_SIZE)
 x_test , y_test  = generators.generate_dataset(N=10000, grid_size=GRID_SIZE)
 
+x_test_large, y_test_large = generators.generate_dataset_addition(N=10000, grid_size=GRID_SIZE, size=5)
 
 
 
@@ -26,6 +27,15 @@ out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 out = layers.Conv2D(NUM_SYMBOLS, (3,3), padding='same')(out)
 
+"""
+out = layers.Flatten()(inp)
+out = layers.Dense(1256, activation=tf.nn.relu)(out)
+out = layers.Dense(1256, activation=tf.nn.relu)(out)
+out = layers.Dense(1256, activation=tf.nn.relu)(out)
+out = layers.Dense(1256, activation=tf.nn.relu)(out)
+out = layers.Dense(GRID_SIZE*GRID_SIZE*NUM_SYMBOLS, activation=tf.nn.relu)(out)
+out = layers.Reshape((GRID_SIZE,GRID_SIZE,NUM_SYMBOLS))(out)
+"""
 model = tf.keras.Model(inputs=inp, outputs=out)
 
 # Instantiate a logistic loss function that expects integer targets.
@@ -58,6 +68,7 @@ def preprocess_test(ds):
 train_dataset = preprocess(tf.data.Dataset.from_tensor_slices((x_train, y_train))).repeat()
 val_dataset = preprocess(tf.data.Dataset.from_tensor_slices((x_val, y_val)))
 test_dataset = preprocess_test(tf.data.Dataset.from_tensor_slices(x_test))
+test_large_dataset = preprocess_test(tf.data.Dataset.from_tensor_slices(x_test_large))
 
 model.fit(train_dataset,
           validation_data=val_dataset, 
@@ -69,4 +80,10 @@ preds = model.predict(test_dataset)
 
 for i in range(10):
     print(x_test[i])
+    print(np.argmax(preds[i], axis=-1))
+
+preds = model.predict(test_large_dataset)
+
+for i in range(10):
+    print(x_test_large[i])
     print(np.argmax(preds[i], axis=-1))

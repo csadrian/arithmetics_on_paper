@@ -76,7 +76,7 @@ class AddSolver(Solver):
 
     def play(self, a, b):
 
-        start = (random.randint(4,6), random.randint(4,6))
+        start = (random.randint(5,7), random.randint(5,7))
         x, y = start
 
         c = a + b
@@ -222,18 +222,8 @@ class FactorizeSolver(Solver):
             factor = primes[i]
         self.paper.make_step()
 
-
-def generate_dataset(N=1000, grid_size=10):
+def generate_with_generators(generators, N, grid_size):
     xs, ys = [], []
-    
-    generators = [
-        AddSolver(a_limits=(100, 500), b_limits=(100, 500)),
-        SubstractSolver(a_limits=(500, 900), b_limits=(100, 400)),
-        IsPrimeSolver(limit=33),
-        IsDivisibleBySolver(limit=20),
-        IsDivisibleBySolver(limit=50),
-        FactorizeSolver(limit=50),
-    ]
 
     for generator in generators:
         for i in range(N):
@@ -250,4 +240,28 @@ def generate_dataset(N=1000, grid_size=10):
 
     p = np.random.permutation(len(xs))
     xs, ys = xs[p].astype(int), ys[p].astype(int)
+
     return xs, ys-xs
+
+
+def generate_dataset(N=1000, grid_size=10):
+    
+    generators = [
+        AddSolver(a_limits=(1000, 5000), b_limits=(1000, 5000)),
+        AddSolver(a_limits=(100, 500), b_limits=(100, 500)),
+        AddSolver(a_limits=(10, 50),   b_limits=(10, 50)),
+        SubstractSolver(a_limits=(500, 900), b_limits=(100, 400)),
+        IsPrimeSolver(limit=33),
+        IsDivisibleBySolver(limit=20),
+        IsDivisibleBySolver(limit=50),
+        FactorizeSolver(limit=50),
+    ]
+    return generate_with_generators(generators, N=N, grid_size=grid_size)
+
+def generate_dataset_addition(N=1000, grid_size=10, size=3):
+    
+    generators = [
+        AddSolver(a_limits=(1*10**(size-1), 5*10**(size-1)), b_limits=(1*10**(size-1), 5*10**(size-1))),
+    ]
+
+    return generate_with_generators(generators, N=N, grid_size=grid_size)
