@@ -9,3 +9,6 @@ __pycache__/
 # Backup files
 *~
 *.swp
+
+# ipynb files
+.ipynb*
