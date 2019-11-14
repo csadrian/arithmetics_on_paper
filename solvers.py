@@ -115,7 +115,7 @@ class AddSolver(Solver):
         x, y = x + 1, start[1]
         self.paper.make_step()
         self.paper.set_attention([(x-1, y)])
-        self.paper.set_attention([(x-1, y-1)], reset=False)
+        self.paper.set_attention([(x-2, y)], reset=False)
         x, y = self.paper.print_number(c, x, y, step_by_step=True)
 
 class IsPrimeSolver(Solver):
