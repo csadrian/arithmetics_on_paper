@@ -1,21 +1,37 @@
+from solvers import *
+import solvers
+from solvers_milan import *
+import solvers_milan
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
 
 symbols = {
-    11: '+',
-    12: '-',
-    13: 'p?',
-    14: '|',
-    15: 'fact',
-    16: '/',
-    -1: ' '
+    solvers.SIGN_ADD: '+',
+    solvers.SIGN_SUB: '-',
+    solvers.SIGN_IS_PRIME: 'p?',
+    solvers.SIGN_IS_DIVISIBLE_BY: '|',
+    solvers.SIGN_FACTORIZE: 'fact',
+    solvers.SIGN_DIV: '/',
+    -1: ' ',
+    solvers.SIGN_YES: '✓',
+    solvers.SIGN_NO: 'X',
+    solvers.SIGN_SQRT: '√',
+    solvers.SIGN_BASE_CONVERSION: '→b',
+    solvers.SIGN_PRODUCT: '*',
+    solvers.SIGN_EQ: '=',
 }
 
 for i in range(10):
     symbols[i] = str(i)
 
-def _plot_paper(array, ax, diff=None, attention=None):
+def _plot_paper(array, ax, diff=None, attention=None, transform=True):
+    if transform:
+        array = np.rot90(array, 3)
+        if diff is not None:
+            diff = np.rot90(diff, 3)
+        if attention is not None:
+            attention = np.rot90(attention, 3)
     nrows, ncols = array.shape
     ax.set_xlim([0, ncols])
     ax.set_ylim([0, nrows])
@@ -56,8 +72,11 @@ def plot_last_step(steps):
 def plot_steps(steps, ncols=None):
     if ncols is None:
         ncols = 1 if len(steps) <= 2 else 2
-    fig, axes = plt.subplots(nrows=int(np.ceil(len(steps)/ncols)),
-                             ncols=ncols, figsize=(8,8))
+    nrows = int(np.ceil(len(steps)/ncols))
+    fig, axes = plt.subplots(nrows=nrows,
+                             ncols=ncols, figsize=(ncols*6,nrows*6))
+    if ncols == 1:
+        axes = np.array(axes)
     axes = axes.flatten()
     for ax in axes:
         ax.axis('off')

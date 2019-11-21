@@ -2,9 +2,9 @@ import numpy as np
 import random
 import tensorflow as tf
 import tensorflow.keras.layers as layers
+from common import number_to_base
 
 from problems import *
-from utils import *
 
 SIGN_ADD = 11
 SIGN_SUB = 12
@@ -12,6 +12,12 @@ SIGN_IS_PRIME = 13
 SIGN_IS_DIVISIBLE_BY = 14
 SIGN_FACTORIZE = 15
 SIGN_DIV = 16
+SIGN_YES = 17
+SIGN_NO = 18
+SIGN_SQRT = 19
+SIGN_BASE_CONVERSION = 20
+SIGN_PRODUCT = 21
+SIGN_EQ = 22
 
 
 
@@ -36,53 +42,89 @@ class PaperWithNumbers:
     def get_steps(self):
         return self.steps
 
-    @staticmethod
-    def number_to_base(n, b=10):
-        if n == 0:
-            return [0]
-        digits = []
-        while n:
-            digits.append(int(n % b))
-            n //= b
-        return digits[::-1]
+    def print_symbols_ltr(self, ns, x, y, attention=False, reset=False,
+                          orientation=1, return_full_pos=False,
+                          step_by_step=False):
+        ns = list(ns)
+        if reset:
+            self.reset_attention()
+        if orientation > 0:
+            ns.reverse()
+        for i in range(len(ns)):
+            offset = i * orientation
+            self.paper[x, y + offset] = ns[-(i+1)]
+            if attention:
+                self.attention[x, y + offset] = 1
+            if step_by_step:
+                self.make_step()
+        if return_full_pos:
+            res = []
+            for i in range(len(ns)):
+                res.append((x, y+orientation*i))
+            return (x, y+orientation*len(ns)), res
+        else:
+            return x, y+orientation*len(ns)
 
-    def print_symbols_ltr(self, ns, x, y):
-        for n in ns:
-            self.paper[x, y] = n
-            y += 1
-        return x, y
-
-    def print_symbol(self, n, x, y, attention=False, reset=False):
+    def print_symbol(self, n, x, y, attention=False, reset=False,
+                     orientation=-1):
         self.paper[x, y] = n
         if reset:
             self.reset_attention()
         if attention:
             self.attention[x, y] = 1
-        return x, y-1
+        return x, y+orientation
 
     def print_number(self, n, x, y, step_by_step=False, attention=False, 
-                     axis='vertical', orientation=-1):
-        n_in_base = self.number_to_base(n)
+                     orientation=-1, return_full_pos=False, reset=False):
+        if reset:
+            self.reset_attention()
+        n_in_base = number_to_base(n)
+        if orientation > 0:
+            n_in_base.reverse()
         for i in range(len(n_in_base)):
             offset = i * orientation
-            if axis == 'vertical':
-                self.paper[x, y + offset] = n_in_base[-(i+1)]
-            if axis == 'horizontal':
-                self.paper[x + offset, y] = n_in_base[-(i+1)]
+            self.paper[x, y + offset] = n_in_base[-(i+1)]
+            if attention:
+                self.attention[x, y + offset] = 1
             if step_by_step:
                 self.make_step()
-        return x, y-len(n_in_base)
+        if return_full_pos:
+            res = []
+            for i in range(len(n_in_base)):
+                res.append((x, y+orientation*i))
+            return (x, y+orientation*len(n_in_base)), res
+        else:
+            return x, y+orientation*len(n_in_base)
 
-    def set_attention(self, points, reset=True):
+    def set_attention(self, points, reset=False):
         if reset:
             self.reset_attention()
         for (x, y) in points:
             self.attention[x, y] = 1
 
+    def remove_attention(self, points):
+        for (x, y) in points:
+            self.attention[x, y] = 0
+
+    def move_right(self, x, y, n=1):
+        return x, y+n
+
+    def move_down(self, x, y, n=1):
+        return x+n, y
+
+    def move_left(self, x, y, n=1):
+        return self.move_right(x, y, -1*n)
+
+    def move_up(self, x, y, n=1):
+        return self.move_down(x, y, -1*n)
+
 class Solver:
 
     def __init__(self, grid_size):
         self.grid_size = grid_size
+
+    def __getattr__(self, attr):
+        return getattr(self.paper, attr)
 
     def set_paper(self):
         self.paper = PaperWithNumbers(self.grid_size)
@@ -216,7 +258,7 @@ class FactorizeSolver(Solver):
         while a != 1:
             while (a % factor == 0) and (a != 1):
                 y = start[1]-3
-                x, y = self.paper.print_symbols_ltr(self.paper.number_to_base(a) + [SIGN_DIV] + self.paper.number_to_base(factor), x, y)
+                x, y = self.paper.print_symbols_ltr(number_to_base(a) + [SIGN_DIV] + number_to_base(factor), x, y)
                 self.paper.make_step()
                 x, y = x + 1, start[1]
                 a = a // factor

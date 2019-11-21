@@ -1,5 +1,6 @@
 import numpy as np
 import random
+from common import number_to_base
 # import tensorflow as tf
 # import tensorflow.keras.layers as layers
 
@@ -38,7 +39,27 @@ class OneNumProblem(Problem):
 class AdditionProblem(BinaryOperationProblem):
     pass
 
+class BaseConversionProblem(Problem):
+    def __init__(self, lim, b1, b2):
+        self.lim = lim
+        self.b1 = b1
+        self.b2 = b2
+
+    def generate_one(self):
+        n = np.random.randint(self.lim)
+        return {
+            'n': n,
+            'b1': self.b1,
+            'b2': self.b2
+        }
+
 # NON-ABSTRACT CLASSES
+class BaseConversion2to3(BaseConversionProblem):
+    order = 10
+    
+    def __init__(self):
+        super().__init__(100, 2, 3)
+
 class EasyAdditionProblem(AdditionProblem):
     order = 10
     def __init__(self):
@@ -63,6 +84,16 @@ class IsPrimeProblem(OneNumProblem):
     def __init__(self):
         super().__init__(30)
 
+
+class IsPrimeProblemHard(Problem):
+    # 50% prime, 50% not.
+    order = 10
+
+    def __init__(self, lim_a):
+        self.lim_a = lim_a
+
+    def generate_one(self):
+        return {'a': np.random.randint(self.lim_a)}
 
 def _problem_example():
     problem = HardAdditionProblem()
