@@ -53,6 +53,17 @@ class BaseConversionProblem(Problem):
             'b2': self.b2
         }
 
+class AddSubMultipleProblem(Problem):
+    #lim is a list of [lower_lim, upper_lim] pairs
+    def __init__(self, lim):
+        self.lim = lim
+    
+    def generate_one(self):
+        return {
+                'coefs' : [np.random.randint(self.lim[i][0], self.lim[i][1]) for i in range(len(self.lim))],
+                'ops' : [np.random.randint(11, 12) for i in range(len(self.lim) - 1)]        
+                }
+
 # NON-ABSTRACT CLASSES
 class BaseConversion2to3(BaseConversionProblem):
     order = 10

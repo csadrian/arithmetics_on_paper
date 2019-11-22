@@ -19,8 +19,20 @@ SIGN_BASE_CONVERSION = 20
 SIGN_PRODUCT = 21
 SIGN_EQ = 22
 
+class Step:
 
+    def __init__(self, paper, attention, solver=None):
+        self.paper = paper
+        self.attention = attention
+        self.solver = solver
 
+    def __getitem__(self, key):
+        if key is 'paper':
+            return self.paper
+        elif key is 'attention':
+            return self.solver
+        elif key is 'solver':
+            return self.solver
 
 class PaperWithNumbers:
 
@@ -33,11 +45,8 @@ class PaperWithNumbers:
     def reset_attention(self):
         self.attention = np.zeros(shape=self.shape)
 
-    def make_step(self):
-        self.steps.append({
-            'paper': self.paper.copy(),
-            'attention': self.attention.copy()
-        })
+    def make_step(self, solver=None):
+        self.steps.append(Step(self.paper.copy(), self.attention, solver))
 
     def get_steps(self):
         return self.steps
