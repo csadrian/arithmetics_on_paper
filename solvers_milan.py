@@ -12,105 +12,95 @@ class IsPrimeSolverEasy(Solver):
 
         is_prime = IsPrimeSolver.is_prime(n)
 
-        start = (5, 5)
-        x, y = start
-        
-        x, y = self.paper.print_number(n, x, y)
+        self.paper.print_number(n, orientation=-1)
 
-        isprimesignpos = x, y
-        self.paper.print_symbol(SIGN_IS_PRIME, *isprimesignpos,
-                                attention=True)
+        self.mark_current_pos('prime_sign')
 
-        x, y = x + 1, start[1]
-        self.paper.make_step()
+        self.paper.print_symbol(SIGN_IS_PRIME, attention=True,
+                                preserve_pos=True)
+
+        self.move_down()
+
+        self.make_step()
 
         if is_prime:
-            self.paper.print_symbol(SIGN_YES, x, y, attention=True, reset=True)
+            self.paper.print_symbol(SIGN_YES, attention=True, reset=True)
         else:
-            self.paper.print_symbol(SIGN_NO, x, y, attention=True, reset=True)
+            self.paper.print_symbol(SIGN_NO, attention=True, reset=True)
 
         self.paper.make_step()
 
 class IsPrimeSolverHard(Solver):
 
     def play(self, problem):
-        start = (1, 4)
-
         n = problem['a']
         is_prime = IsPrimeSolver.is_prime(n)
 
-        x, y = start
+        self.print_number(n, mark_pos=('number'))
 
-        (x, y), number_pos = self.paper.print_number(
-            n, x, y, return_full_pos=True)
+        self.mark_current_pos('prime_sign')
 
-        isprimesignpos = x, y
-
-        self.paper.print_symbol(SIGN_IS_PRIME, *isprimesignpos,
-                                attention=True)
+        self.paper.print_symbol(SIGN_IS_PRIME, attention=True,
+                                preserve_pos=True)
 
         self.paper.make_step()
 
         # ha elég kicsi a szám, akkor tudhatjuk fejből
         if n <= 23:
-            x, y = self.move_down(x, y)
+            self.move_down()
             sign = SIGN_YES if is_prime else SIGN_NO
-            self.paper.print_symbol(sign, x, y, attention=True, reset=True)
+            self.paper.print_symbol(sign, attention=True, reset=True)
             self.paper.make_step()
             return
 
-
+        self.go_to_mark_range('number', end=True)
         # ha ennél nagyobb, akkor ellenőrizzük, hogy vannak-e osztói
-        x, y = self.move_right(*start, 1)
-        self.print_symbol(SIGN_SQRT, x, y, attention=True, reset=True)
-
+        self.move_right(1)
+        self.print_symbol(SIGN_SQRT, attention=True, reset=True,
+                          orientation=1)
         self.paper.make_step()
-
-        x, y = self.move_right(x, y, 1)
 
         # +2: mert csak becsüljük a gyököt, inkább legyen biztos.
         # kell?
         sqrt_n = int(np.sqrt(n)) + 2
 
-        _, sqrt_pos = self.print_number(
-            sqrt_n, x, y, orientation=1, return_full_pos=True)
+        self.print_number(sqrt_n, orientation=1, mark_pos='sqrt',
+                          preserve_pos=True)
 
         self.paper.make_step()
 
         possible_divisors = primes_lt(sqrt_n)
 
-        x, y = self.move_down(x, y)
-        x, y = self.move_left(x, y)
-
+        self.move_down()
+        self.move_left()
 
         for divisor in possible_divisors:
-            div_sign_pos = x, y
-            self.print_symbol(SIGN_IS_DIVISIBLE_BY, *div_sign_pos,
+            self.mark_current_pos('div_sign')
+            self.print_symbol(SIGN_IS_DIVISIBLE_BY,
                               attention=True, reset=True)
-            self.set_attention(number_pos)
-            x, y = self.move_right(*div_sign_pos)
-            x, y = self.print_number(divisor, x, y, orientation=1,
-                                     attention=True, reset=True)
+            self.set_attention_mark_range('number')
+            self.print_number(divisor, orientation=1,
+                              attention=True, reset=True)
             self.make_step()
             if n % divisor == 0:
-                self.print_symbol(SIGN_YES, x, y, attention=True)
-                x, y = self.move_down(*isprimesignpos)
+                self.print_symbol(SIGN_YES, attention=True)
+                self.go_to_mark('prime_sign')
+                self.move_down()
                 self.make_step()
                 # találtunk osztót, tehát nem prím
-                self.print_symbol(SIGN_NO, x, y, attention=True, reset=True)
+                self.print_symbol(SIGN_NO, attention=True, reset=True)
                 self.make_step()
                 return
             else:
-                self.print_symbol(SIGN_NO, x, y, attention=True)
-                self.set_attention(sqrt_pos)
+                self.print_symbol(SIGN_NO, attention=True)
+                # self.set_attention(sqrt_pos)
                 self.make_step()
-            x, y = self.move_down(*div_sign_pos)
+            self.go_to_mark('div_sign')
+            self.move_down()
 
-        x, y = self.move_down(*isprimesignpos)
-        self.print_symbol(SIGN_YES, x, y, attention=True, reset=True)
-        self.paper.make_step()
-
-        self.set_attention([(x, y)], reset=False)
+        self.go_to_mark('prime_sign')
+        self.move_down()
+        self.print_symbol(SIGN_YES, attention=True, reset=True)
         self.paper.make_step()
 
 class RoundNumber(Solver):

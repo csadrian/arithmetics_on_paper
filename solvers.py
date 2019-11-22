@@ -27,20 +27,33 @@ class Step:
         self.solver = solver
 
     def __getitem__(self, key):
-        if key is 'paper':
-            return self.paper
-        elif key is 'attention':
-            return self.solver
-        elif key is 'solver':
-            return self.solver
+        return getattr(self, key)
+
+def print_func(func):
+    def inner(*args, **kwargs):
+        self = args[0]
+        if kwargs.pop('reset', False):
+            self.reset_attention()
+        x, y = self._x, self._y
+        reserve_pos = kwargs.pop('preserve_pos', False)
+        res = func(*args, **kwargs)
+        if reserve_pos:
+            self._set_position(x, y)
+        return res
+    return inner
 
 class PaperWithNumbers:
 
-    def __init__(self, grid_size):
+    def __init__(self, grid_size, startx=3, starty=3):
         self.shape = (grid_size, grid_size)
         self.paper = -1*np.ones(shape=self.shape)
         self.reset_attention()
         self.steps = []
+        self._x = startx
+        self._y = starty
+        self._marked_cells = dict()
+        self._marked_ranges = dict()
+        self.mark_current_pos('start')
 
     def reset_attention(self):
         self.attention = np.zeros(shape=self.shape)
@@ -51,12 +64,57 @@ class PaperWithNumbers:
     def get_steps(self):
         return self.steps
 
-    def print_symbols_ltr(self, ns, x, y, attention=False, reset=False,
-                          orientation=1, return_full_pos=False,
+    def _mark_cell(self, name, pos):
+        self._marked_cells[name] = pos
+
+    def _mark_range(self, name, range):
+        # range: list of x,y points.
+        # sorted ltr!
+        self._marked_ranges[name] = sorted(range)
+
+    def _set_position(self, x, y):
+        self._x, self._y = x, y
+
+    def go_to_mark(self, name):
+        mark = self._marked_cells[name]
+        self._x, self._y = mark
+
+    def go_to_mark_range(self, name, end=False):
+        """
+        end : bool
+            if True: go to end of range, otherwise beginning
+        """
+        mark = self._marked_ranges[name]
+        self._x, self._y = mark[-1] if end else mark[0]
+
+    def set_attention_mark(self, name):
+        self.set_attention([self._marked_cells[name]])
+
+    def remove_attention_mark(self, name):
+        self.remove_attention([self._marked_cells[name]])
+
+    def set_attention_mark_range(self, name):
+        self.set_attention(self._marked_ranges[name])
+
+    def remove_attention_mark_range(self, name):
+        self.remove_attention(self._marked_ranges[name])
+
+    def mark_current_pos(self, name):
+        self._mark_cell(name, (self._x, self._y))
+
+    def set_attention_current_pos(self):
+        self.set_attention([(self._x, self._y)])
+
+    @print_func
+    def print_symbols_ltr(self, ns, attention=False,
+                          orientation=1, mark_pos=False,
                           step_by_step=False):
+        """
+        mark_pos : bool or str
+            False/0 if no marking needed, name of the mark otherwise
+        """
+        x, y = self._x, self._y
         ns = list(ns)
-        if reset:
-            self.reset_attention()
         if orientation > 0:
             ns.reverse()
         for i in range(len(ns)):
@@ -66,27 +124,26 @@ class PaperWithNumbers:
                 self.attention[x, y + offset] = 1
             if step_by_step:
                 self.make_step()
-        if return_full_pos:
-            res = []
+        if mark_pos:
+            range_ = []
             for i in range(len(ns)):
-                res.append((x, y+orientation*i))
-            return (x, y+orientation*len(ns)), res
-        else:
-            return x, y+orientation*len(ns)
+                range_.append((x, y+orientation*i))
+            self._mark_range(mark_pos, range_)
+        self._set_position(x, y)
 
-    def print_symbol(self, n, x, y, attention=False, reset=False,
-                     orientation=-1):
+    @print_func
+    def print_symbol(self, n, attention=False,
+                     orientation=1):
+        x, y = self._x, self._y
         self.paper[x, y] = n
-        if reset:
-            self.reset_attention()
         if attention:
             self.attention[x, y] = 1
-        return x, y+orientation
+        self._set_position(x, y+orientation)
 
-    def print_number(self, n, x, y, step_by_step=False, attention=False, 
-                     orientation=-1, return_full_pos=False, reset=False):
-        if reset:
-            self.reset_attention()
+    @print_func
+    def print_number(self, n, step_by_step=False, attention=False, 
+                     orientation=-1, mark_pos=False):
+        x, y = self._x, self._y
         n_in_base = number_to_base(n)
         if orientation > 0:
             n_in_base.reverse()
@@ -97,13 +154,12 @@ class PaperWithNumbers:
                 self.attention[x, y + offset] = 1
             if step_by_step:
                 self.make_step()
-        if return_full_pos:
+        if mark_pos:
             res = []
             for i in range(len(n_in_base)):
                 res.append((x, y+orientation*i))
-            return (x, y+orientation*len(n_in_base)), res
-        else:
-            return x, y+orientation*len(n_in_base)
+            self._mark_range(mark_pos, res)
+        self._set_position(x, y+orientation*len(n_in_base))
 
     def set_attention(self, points, reset=False):
         if reset:
@@ -115,17 +171,17 @@ class PaperWithNumbers:
         for (x, y) in points:
             self.attention[x, y] = 0
 
-    def move_right(self, x, y, n=1):
-        return x, y+n
+    def move_right(self, n=1):
+        self._y = self._y + n
 
-    def move_down(self, x, y, n=1):
-        return x+n, y
+    def move_down(self, n=1):
+        self._x = self._x + n 
 
-    def move_left(self, x, y, n=1):
-        return self.move_right(x, y, -1*n)
+    def move_left(self, n=1):
+        return self.move_right(-1*n)
 
-    def move_up(self, x, y, n=1):
-        return self.move_down(x, y, -1*n)
+    def move_up(self, n=1):
+        return self.move_down(-1*n)
 
 class Solver:
 
