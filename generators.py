@@ -63,17 +63,27 @@ def generator(Solver_, Problem_, N=10):
 
 
 def generate_dataset_test():
-    solutions = generator(Solver_=solvers.IsPrimeSolverEasy, Problem_=problems.IsPrimeProblem, N=100)
-    records = solutions_to_pairs(solutions)
-    write_tfrecords(records, 'test1.train')
 
-    solutions = generator(Solver_=solvers.IsPrimeSolverEasy, Problem_=problems.IsPrimeProblem, N=100)
-    records = solutions_to_pairs(solutions)
-    write_tfrecords(records, 'test1.val')
+    curriculum = [
+        {'problem': problems.IsPrimeProblem, 'solver': solvers.IsPrimeSolverEasy, 'n': 100 },
+        {'problem': problems.IsPrimeProblem, 'solver': solvers.IsPrimeSolverEasy, 'n': 100 }
+    ]
+    for curr in curriculum:
+        # Train, validation and test is not completely separated now,
+        # as a given problem can occur randomly in all sets.
 
-    solutions = generator(Solver_=solvers.IsPrimeSolverEasy, Problem_=problems.IsPrimeProblem, N=100)
-    records = solutions_to_pairs(solutions)
-    write_tfrecords(records, 'test1.test')
+        solutions = generator(Solver_=curr['solver'], Problem_=curr['problem'], N=curr['n'])
+        records = solutions_to_pairs(solutions)
+        write_tfrecords(records, 'test1.train')
+
+        solutions = generator(Solver_=curr['solver'], Problem_=curr['problem'], N=curr['n'])
+        records = solutions_to_pairs(solutions)
+        write_tfrecords(records, 'test1.val')
+
+        solutions = generator(Solver_=curr['solver'], Problem_=curr['problem'], N=curr['n'])
+        records = solutions_to_pairs(solutions)
+        write_tfrecords(records, 'test1.test')
+
 
 def solutions_to_pairs(solutions):
     records = []
