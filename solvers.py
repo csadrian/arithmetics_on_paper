@@ -46,7 +46,7 @@ class PaperWithNumbers:
 
     def __init__(self, grid_size, startx=3, starty=3):
         self.shape = (grid_size, grid_size)
-        self.paper = -1*np.ones(shape=self.shape)
+        self.paper = -1*np.ones(shape=self.shape, dtype=np.int32)
         self.reset_attention()
         self.steps = []
         self._x = startx
@@ -211,15 +211,17 @@ class AddSolver(Solver):
     def play(self, problem):
         a = problem['a']
         b = problem['b']
-        start = (random.randint(5, 7), random.randint(5, 7))
-        x, y = start
+        #start = (random.randint(5, 7), random.randint(5, 7))
+        #x, y = start
 
         c = a + b
-        self.paper.print_number(a, x, y)
-        x, y = x + 1, start[1]
-        x, y = self.paper.print_number(b, x, y)
-        self.paper.print_symbol(SIGN_ADD, x, y, attention=True)
-        x, y = x + 1, start[1]
+
+        self.paper.print_number(a, orientation=0)
+        self.move_down()
+        self.paper.print_number(b, orientation=-1)
+
+        self.paper.print_symbol(SIGN_ADD, attention=True)
+
         self.paper.make_step()
         self.paper.set_attention([(x-1, y)])
         self.paper.set_attention([(x-2, y)], reset=False)
