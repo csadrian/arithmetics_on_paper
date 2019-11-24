@@ -22,13 +22,20 @@ SIGN_EQ = 22
 def print_func(func):
     def inner(*args, **kwargs):
         self = args[0]
-        if kwargs.pop('reset', False):
-            self.reset_attention()
         x, y = self._x, self._y
         reserve_pos = kwargs.pop('preserve_pos', False)
         res = func(*args, **kwargs)
         if reserve_pos:
             self._set_position(x, y)
+        return res
+    return inner
+
+def reset_arg(func):
+    def inner(*args, **kwargs):
+        self = args[0]
+        if kwargs.pop('reset', False):
+            self.reset_attention()
+        res = func(*args, **kwargs)
         return res
     return inner
 
@@ -81,12 +88,14 @@ class PaperWithNumbers:
         mark = self._marked_ranges[name]
         self._x, self._y = mark[-1] if end else mark[0]
 
+    @reset_arg
     def set_attention_mark(self, name):
         self.set_attention([self._marked_cells[name]])
 
     def remove_attention_mark(self, name):
         self.remove_attention([self._marked_cells[name]])
 
+    @reset_arg
     def set_attention_mark_range(self, name):
         self.set_attention(self._marked_ranges[name])
 
@@ -96,10 +105,12 @@ class PaperWithNumbers:
     def mark_current_pos(self, name):
         self._mark_cell(name, (self._x, self._y))
 
+    @reset_arg
     def set_attention_current_pos(self):
         self.set_attention([(self._x, self._y)])
 
     @print_func
+    @reset_arg
     def print_symbols_ltr(self, ns, attention=False,
                           orientation=1, mark_pos=False,
                           step_by_step=False):
@@ -109,15 +120,15 @@ class PaperWithNumbers:
         """
         x, y = self._x, self._y
         ns = list(ns)
-        if orientation > 0:
+        if orientation < 0:
             ns.reverse()
-        for i in range(len(ns)):
-            offset = i * orientation
-            self.paper[x, y + offset] = ns[-(i+1)]
+        for i, symbol in enumerate(ns):
+            self.paper[x, y] = symbol
             if attention:
-                self.attention[x, y + offset] = 1
+                self.attention[x, y] = 1
             if step_by_step:
                 self.make_step()
+            y += orientation
         if mark_pos:
             range_ = []
             for i in range(len(ns)):
@@ -126,15 +137,19 @@ class PaperWithNumbers:
         self._set_position(x, y)
 
     @print_func
+    @reset_arg
     def print_symbol(self, n, attention=False,
-                     orientation=1):
+                     orientation=1, mark_pos=False):
         x, y = self._x, self._y
         self.paper[x, y] = n
         if attention:
             self.attention[x, y] = 1
+        if mark_pos:
+            self._mark_cell(mark_pos, (self._x, self._y))
         self._set_position(x, y+orientation)
 
     @print_func
+    @reset_arg
     def print_number(self, n, step_by_step=False, attention=False, 
                      orientation=-1, mark_pos=False):
         x, y = self._x, self._y
@@ -155,9 +170,8 @@ class PaperWithNumbers:
             self._mark_range(mark_pos, res)
         self._set_position(x, y+orientation*len(n_in_base))
 
-    def set_attention(self, points, reset=False):
-        if reset:
-            self.reset_attention()
+    @reset_arg
+    def set_attention(self, points):
         for (x, y) in points:
             self.attention[x, y] = 1
 
