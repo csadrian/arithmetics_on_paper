@@ -39,6 +39,10 @@ class OneNumProblem(Problem):
 class AdditionProblem(BinaryOperationProblem):
     pass
 
+class MultiplicationProblem(BinaryOperationProblem):
+    pass
+
+
 class BaseConversionProblem(Problem):
     def __init__(self, lim, b1, b2):
         self.lim = lim
@@ -77,10 +81,15 @@ class EasyAdditionProblem(AdditionProblem):
         super().__init__(10, 10)
 
 
-class EasyProductProblem(AdditionProblem):
+class EasyMultiplicationProblem(MultiplicationProblem):
     order = 20
     def __init__(self):
         super().__init__(10, 10)
+
+class HardMultiplicationProblem(MultiplicationProblem):
+    order = 200
+    def __init__(self):
+        super().__init__(100, 100)
 
 
 class HardAdditionProblem(AdditionProblem):
@@ -115,7 +124,8 @@ def _problem_example():
 
 __all__ = [
     'EasyAdditionProblem',
-    'EasyProductProblem',
     'HardAdditionProblem',
+    'EasyMultiplicationProblem',
+    'HardMultiplicationProblem',
     'IsPrimeProblem'
 ]

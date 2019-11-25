@@ -39,7 +39,7 @@ def reset_arg(func):
 
 class PaperWithNumbers:
 
-    def __init__(self, grid_size, startx=3, starty=3):
+    def __init__(self, grid_size, startx=0, starty=5):
         self.shape = (grid_size, grid_size)
         self.paper = -1*np.ones(shape=self.shape, dtype=np.int32)
         self.reset_attention()
@@ -246,6 +246,47 @@ class SubtractSolver(Solver):
         self.paper.print_number(c, attention=True, reset=True)
         self.paper.make_step()
 
+class MultiplySolver(Solver):
+
+    def play(self, problem):
+        a = problem['a']
+        b = problem['b']
+
+        c = a * b
+
+        self.paper.print_number(a, orientation=1)
+        self.paper._mark_cell('a_end', (self._x, self._y - 1))
+        self.paper.print_symbol(S.product, attention=True)
+        self.paper.print_number(b, orientation=1)
+        self.paper._mark_cell('b_end', (self._x, self._y - 1))
+        self.paper.make_step()
+
+        b_copy = b
+        k = 0
+        rs = []
+
+        while b_copy != 0:
+            m = b_copy % 10
+            r = m * a * 10**k
+            rs.append(r)
+            # TODO set attention # self.paper.set_attention()
+            self.paper._set_position(self._marked_cells['a_end'][0], self._marked_cells['a_end'][1])
+            self.move_down(k+1)
+            self.paper.print_number(r, orientation=-1)
+            self.paper.make_step()
+
+            b_copy = b_copy // 10
+            k += 1
+
+        # TODO set attention
+        self.paper.print_symbol(S.add, orientation=-1, attention=True)
+        self.paper.make_step()
+        self.paper._set_position(self._marked_cells['a_end'][0], self._marked_cells['a_end'][1])
+        self.move_down(k+1)
+        final_result = np.sum(rs)
+        self.paper.print_number(final_result, orientation=-1)
+        self.paper.make_step(solver='AddSolver')
+
 class IsDivisibleBySolver(Solver):
 
     def play(self, problem):
@@ -308,5 +349,6 @@ __all__ = [
     'AddSolver',
     'SubtractSolver',
     'IsDivisibleBySolver',
-    'FactorizeSolver'
+    'FactorizeSolver',
+    'MultiplySolver'
 ]
