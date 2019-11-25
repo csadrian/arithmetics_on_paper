@@ -23,3 +23,38 @@ def primes_lt(n):
         if is_prime(i):
             res.append(i)
     return res
+
+class Symbols:
+    add = 11
+    sub = 12
+    is_prime = 13
+    is_divisible_by = 14
+    factorize = 15
+    div = 16
+    yes = 17
+    no = 18
+    sqrt = 19
+    base_conversion = 20
+    product = 21
+    eq = 22
+
+    @classmethod
+    def visual(cls, n):
+        symbols = {
+            cls.add: '+',
+            cls.sub: '-',
+            cls.is_prime: 'p?',
+            cls.is_divisible_by: '|',
+            cls.factorize: 'fact',
+            cls.div: '/',
+            -1: ' ',
+            cls.yes: '✓',
+            cls.no: 'X',
+            cls.sqrt: '√',
+            cls.base_conversion: '→b',
+            cls.product: '*',
+            cls.eq: '=',
+        }
+        for i in range(10):
+            symbols[i] = str(i)
+        return symbols[n]

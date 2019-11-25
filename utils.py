@@ -5,25 +5,7 @@ import solvers_milan
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
-
-symbols = {
-    solvers.SIGN_ADD: '+',
-    solvers.SIGN_SUB: '-',
-    solvers.SIGN_IS_PRIME: 'p?',
-    solvers.SIGN_IS_DIVISIBLE_BY: '|',
-    solvers.SIGN_FACTORIZE: 'fact',
-    solvers.SIGN_DIV: '/',
-    -1: ' ',
-    solvers.SIGN_YES: '✓',
-    solvers.SIGN_NO: 'X',
-    solvers.SIGN_SQRT: '√',
-    solvers.SIGN_BASE_CONVERSION: '→b',
-    solvers.SIGN_PRODUCT: '*',
-    solvers.SIGN_EQ: '=',
-}
-
-for i in range(10):
-    symbols[i] = str(i)
+from common import Symbols as S
 
 def _plot_paper(array, ax, diff=None, attention=None, transform=True):
     if transform:
@@ -58,7 +40,7 @@ def _plot_paper(array, ax, diff=None, attention=None, transform=True):
                                     }
             if diff[i, j]:
                 fontdict['color'] = 'green'
-            ax.text(i+0.5, j+0.5, (symbols[symbol]),
+            ax.text(i+0.5, j+0.5, (S.visual(symbol)),
                     horizontalalignment='center',
                     verticalalignment='center',
                     fontdict=fontdict 

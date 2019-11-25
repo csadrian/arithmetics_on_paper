@@ -2,22 +2,9 @@ import numpy as np
 import random
 import tensorflow as tf
 import tensorflow.keras.layers as layers
-from common import number_to_base
+from common import number_to_base, Symbols as S
 
 from problems import *
-
-SIGN_ADD = 11
-SIGN_SUB = 12
-SIGN_IS_PRIME = 13
-SIGN_IS_DIVISIBLE_BY = 14
-SIGN_FACTORIZE = 15
-SIGN_DIV = 16
-SIGN_YES = 17
-SIGN_NO = 18
-SIGN_SQRT = 19
-SIGN_BASE_CONVERSION = 20
-SIGN_PRODUCT = 21
-SIGN_EQ = 22
 
 class Step:
 
@@ -233,7 +220,7 @@ class AddSolver(Solver):
         self.paper.print_number(a, orientation=-1, preserve_pos=True)
         self.move_down()
         self.paper.print_number(b, orientation=-1)
-        self.paper.print_symbol(SIGN_ADD, attention=True)
+        self.paper.print_symbol(S.add, attention=True)
         self.paper.make_step()
         self.go_to_mark('start')
         self.move_down(2)
@@ -251,7 +238,7 @@ class SubtractSolver(Solver):
         self.go_to_mark('start')
         self.move_down()
         self.paper.print_number(b, orientation=-1, attention=True)
-        self.paper.print_symbol(SIGN_SUB, orientation=0, attention=True)
+        self.paper.print_symbol(S.sub, orientation=0, attention=True)
 
         self.paper.make_step()
         self.go_to_mark('start')
@@ -268,15 +255,15 @@ class IsDivisibleBySolver(Solver):
         self.go_to_mark('start')
         self.move_down()
         self.paper.print_number(b)
-        self.paper.print_symbol(SIGN_IS_DIVISIBLE_BY)
+        self.paper.print_symbol(S.is_divisible_by)
 
         self.move_down()
         self.paper.make_step()
 
         if a % b == 0:
-            self.paper.print_symbol(SIGN_YES, attention=True, reset=True)
+            self.paper.print_symbol(S.yes, attention=True, reset=True)
         else:
-            self.paper.print_symbol(SIGN_NO, attention=True, reset=True)
+            self.paper.print_symbol(S.no, attention=True, reset=True)
 
         self.paper.make_step()
 
@@ -288,7 +275,7 @@ class FactorizeSolver(Solver):
         a = problem['a']
 
         self.paper.print_number(a)
-        self.paper.print_symbol(SIGN_FACTORIZE)
+        self.paper.print_symbol(S.factorize)
 
         self.go_to_mark('start')
         self.move_down()
@@ -305,7 +292,9 @@ class FactorizeSolver(Solver):
                 self.go_to_mark('start')
                 self.move_down(j+1)
                 self.move_right()
-                self.paper.print_symbols_ltr(number_to_base(a) + [SIGN_DIV] + number_to_base(factor), orientation=-1, attention=True, reset=True)
+                self.paper.print_symbols_ltr(
+                    number_to_base(a) + [S.div] + number_to_base(factor),
+                    orientation=-1, attention=True, reset=True)
                 self.paper.make_step()
                 a = a // factor
                 j += 1

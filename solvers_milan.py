@@ -1,9 +1,8 @@
 import numpy as np
-from solvers import Solver, AddSolver, SIGN_IS_PRIME, SIGN_ADD,\
-    SIGN_YES, SIGN_NO, SIGN_SQRT, SIGN_IS_DIVISIBLE_BY,\
-    SIGN_BASE_CONVERSION, SIGN_PRODUCT, SIGN_EQ
+from solvers import Solver, AddSolver
 
-from common import number_to_base, is_prime, primes_lt
+from common import number_to_base, is_prime, primes_lt, Symbols as S
+
 
 class IsPrimeSolverEasy(Solver):
 
@@ -16,7 +15,7 @@ class IsPrimeSolverEasy(Solver):
 
         self.mark_current_pos('prime_sign')
 
-        self.paper.print_symbol(SIGN_IS_PRIME, attention=True,
+        self.paper.print_symbol(S.is_prime, attention=True,
                                 preserve_pos=True)
 
         self.move_down()
@@ -24,9 +23,9 @@ class IsPrimeSolverEasy(Solver):
         self.make_step()
 
         if is_prime_:
-            self.paper.print_symbol(SIGN_YES, attention=True, reset=True)
+            self.paper.print_symbol(S.yes, attention=True, reset=True)
         else:
-            self.paper.print_symbol(SIGN_NO, attention=True, reset=True)
+            self.paper.print_symbol(S.no, attention=True, reset=True)
 
         self.paper.make_step()
 
@@ -40,7 +39,7 @@ class IsPrimeSolverHard(Solver):
 
         self.mark_current_pos('prime_sign')
 
-        self.paper.print_symbol(SIGN_IS_PRIME, attention=True,
+        self.paper.print_symbol(S.is_prime, attention=True,
                                 preserve_pos=True)
 
         self.paper.make_step()
@@ -48,7 +47,7 @@ class IsPrimeSolverHard(Solver):
         # ha elég kicsi a szám, akkor tudhatjuk fejből
         if n <= 23:
             self.move_down()
-            sign = SIGN_YES if is_prime_ else SIGN_NO
+            sign = S.yes if is_prime_ else S.no
             self.paper.print_symbol(sign, attention=True, reset=True)
             self.paper.make_step()
             return
@@ -56,7 +55,7 @@ class IsPrimeSolverHard(Solver):
         self.go_to_mark_range('number', end=True)
         # ha ennél nagyobb, akkor ellenőrizzük, hogy vannak-e osztói
         self.move_right(1)
-        self.print_symbol(SIGN_SQRT, attention=True, reset=True,
+        self.print_symbol(S.sqrt, attention=True, reset=True,
                           orientation=1)
         self.paper.make_step()
 
@@ -76,23 +75,23 @@ class IsPrimeSolverHard(Solver):
 
         for divisor in possible_divisors:
             self.mark_current_pos('div_sign')
-            self.print_symbol(SIGN_IS_DIVISIBLE_BY,
+            self.print_symbol(S.is_divisible_by,
                               attention=True, reset=True)
             self.set_attention_mark_range('number')
             self.print_number(divisor, orientation=1,
                               attention=True, reset=True)
             self.make_step()
             if n % divisor == 0:
-                self.print_symbol(SIGN_YES, attention=True)
+                self.print_symbol(S.yes, attention=True)
                 self.go_to_mark('prime_sign')
                 self.move_down()
                 self.make_step()
                 # találtunk osztót, tehát nem prím
-                self.print_symbol(SIGN_NO, attention=True, reset=True)
+                self.print_symbol(S.no, attention=True, reset=True)
                 self.make_step()
                 return
             else:
-                self.print_symbol(SIGN_NO, attention=True)
+                self.print_symbol(S.no, attention=True)
                 # self.set_attention(sqrt_pos)
                 self.make_step()
             self.go_to_mark('div_sign')
@@ -100,7 +99,7 @@ class IsPrimeSolverHard(Solver):
 
         self.go_to_mark('prime_sign')
         self.move_down()
-        self.print_symbol(SIGN_YES, attention=True, reset=True)
+        self.print_symbol(S.yes, attention=True, reset=True)
         self.paper.make_step()
 
 class RoundNumber(Solver):
@@ -126,7 +125,7 @@ class BaseConversionSolver(Solver):
         self.go_to_mark('start')
         self.move_down()
         self.print_number(b1, orientation=1, attention=1)
-        self.print_symbol(SIGN_BASE_CONVERSION, orientation=1,
+        self.print_symbol(S.base_conversion, orientation=1,
                           attention=1, mark_pos='base_conversion_sign')
         self.print_number(b2, orientation=1, attention=1)
         self.make_step()
@@ -141,12 +140,12 @@ class BaseConversionSolver(Solver):
             self.mark_current_pos('s')
             # TODO why 3?
             self.move_left(3)
-            self.print_symbol(SIGN_ADD)
+            self.print_symbol(S.add)
             self.print_number(digit, orientation=1)
-            self.print_symbol(SIGN_PRODUCT, orientation=1)
+            self.print_symbol(S.product, orientation=1)
             self.print_symbols_ltr(
                 number_to_base(b1**i, b=b2), orientation=1)
-            self.print_symbol(SIGN_EQ, orientation=1)
+            self.print_symbol(S.eq, orientation=1)
             self.print_number(b1**i*digit, orientation=1)
             self.make_step()
             self.go_to_mark('s')
@@ -157,7 +156,7 @@ class BaseConversionSolver(Solver):
         self.paper.make_step()
         self.go_to_mark('base_conversion_sign')
         self.move_down()
-        self.print_symbol(SIGN_YES)
+        self.print_symbol(S.yes)
 
         self.set_attention_current_pos()
         self.paper.make_step()

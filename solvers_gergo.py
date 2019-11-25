@@ -1,5 +1,6 @@
 import numpy as np
-from solvers import Solver, AddSolver, SubtractSolver, SIGN_ADD, SIGN_YES, SIGN_NO
+from solvers import Solver, AddSolver, SubtractSolver
+from common import Symbols as S
 
 class AddSubMultipleSolver(Solver):
 
