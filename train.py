@@ -3,19 +3,23 @@ import random
 import tensorflow as tf
 import tensorflow.keras.layers as layers
 import tensorflow_datasets as tfds
+import sys
 
 import generators
 
-NUM_SYMBOLS = 18
-GRID_SIZE = 12
+tf.compat.v1.enable_eager_execution()
 
-x_train, y_train = generators.generate_dataset(N=20000, grid_size=GRID_SIZE)
-x_val  , y_val   = generators.generate_dataset(N=10000, grid_size=GRID_SIZE)
-x_test , y_test  = generators.generate_dataset(N=10000, grid_size=GRID_SIZE)
+NUM_SYMBOLS = 25
+GRID_SIZE = 15
 
-x_test_large, y_test_large = generators.generate_dataset_addition(N=10000, grid_size=GRID_SIZE, size=5)
+#x_train, y_train = generators.generate_dataset(N=20000, grid_size=GRID_SIZE)
+#x_val  , y_val   = generators.generate_dataset(N=10000, grid_size=GRID_SIZE)
+#x_test , y_test  = generators.generate_dataset(N=10000, grid_size=GRID_SIZE)
+#x_test_large, y_test_large = generators.generate_dataset_addition(N=10000, grid_size=GRID_SIZE, size=5)
 
-
+xy_train =  generators.sup_dataset_from_tfrecords(['test1.train.tfrecords'])
+xy_val   =  generators.sup_dataset_from_tfrecords(['test1.val.tfrecords'])
+xy_test  =  generators.sup_dataset_from_tfrecords(['test1.test.tfrecords'])
 
 # Instantiate a simple classification model
 inp = tf.keras.layers.Input(shape=(GRID_SIZE, GRID_SIZE, NUM_SYMBOLS))
@@ -61,29 +65,38 @@ def preprocess(ds):
     return ds
 
 def preprocess_test(ds):
-    ds = ds.batch(50)
-    ds = ds.map(lambda x: tf.one_hot(x, NUM_SYMBOLS, axis=-1))
+    ds = ds.shuffle(10000)
+    ds = ds.map(lambda x, y: tf.one_hot(x, NUM_SYMBOLS, axis=-1))
     return ds
 
-train_dataset = preprocess(tf.data.Dataset.from_tensor_slices((x_train, y_train))).repeat()
-val_dataset = preprocess(tf.data.Dataset.from_tensor_slices((x_val, y_val)))
-test_dataset = preprocess_test(tf.data.Dataset.from_tensor_slices(x_test))
-test_large_dataset = preprocess_test(tf.data.Dataset.from_tensor_slices(x_test_large))
+train_dataset = preprocess(xy_train).repeat()
+val_dataset = preprocess(xy_val).repeat()
+test_dataset = preprocess_test(xy_test)
 
 model.fit(train_dataset,
-          validation_data=val_dataset, 
-          epochs=10,
+          validation_data=val_dataset,
+          validation_steps=100,
+          epochs=1,
           steps_per_epoch=1000,
           callbacks=callbacks)
 
-preds = model.predict(test_dataset)
+
+np.set_printoptions(threshold=sys.maxsize)
+
+x_test = [e.numpy() for e in test_dataset]
+x_test = np.array(x_test)
+
+preds = model.predict(x_test)
 
 for i in range(10):
-    print(x_test[i])
+    print(np.argmax(x_test[i], axis=-1))
     print(np.argmax(preds[i], axis=-1))
 
+
+"""
 preds = model.predict(test_large_dataset)
 
 for i in range(10):
     print(x_test_large[i])
     print(np.argmax(preds[i], axis=-1))
+"""
