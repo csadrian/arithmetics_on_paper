@@ -67,7 +67,8 @@ class PaperWithNumbers:
         self.attention = np.zeros(shape=self.shape)
 
     def make_step(self, solver=None):
-        self.steps.append(Step(self.paper.copy(), self.attention, solver))
+        self.steps.append(Step(self.paper.copy(), self.attention.copy(),
+                               solver))
 
     def get_steps(self):
         return self.steps
