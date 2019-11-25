@@ -10,7 +10,7 @@ class IsPrimeSolverEasy(Solver):
     def play(self, problem):
         n = problem['a']
 
-        is_prime = IsPrimeSolver.is_prime(n)
+        is_prime = is_prime(n)
 
         self.paper.print_number(n, orientation=-1)
 
@@ -34,7 +34,7 @@ class IsPrimeSolverHard(Solver):
 
     def play(self, problem):
         n = problem['a']
-        is_prime = IsPrimeSolver.is_prime(n)
+        is_prime = is_prime(n)
 
         self.print_number(n, mark_pos=('number'))
 

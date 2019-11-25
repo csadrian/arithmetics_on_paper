@@ -241,36 +241,6 @@ class AddSolver(Solver):
         self.paper.print_number(c, attention=True, orientation=-1, reset=True)
         self.paper.make_step()
 
-class IsPrimeSolver(Solver):
-
-    @staticmethod
-    def is_prime(x):
-        if x < 2:
-            return False
-        else:
-            for n in range(2,x):
-                if x % n == 0:
-                   return False
-            return True
-
-    def play(self, problem):
-        a = problem['a']
-
-        start = (random.randint(4,6), random.randint(4,6))
-        x, y = start
-
-        x, y = self.paper.print_number(a, x, y)
-        self.paper.print_symbol(SIGN_IS_PRIME, x, y, attention=True)
-        x, y = x + 1, start[1]
-        self.paper.make_step()
-
-        if self.is_prime(a):
-            self.paper.print_number(1, x, y)
-        else:
-            self.paper.print_number(0, x, y)
-
-        self.paper.make_step()
-
 class SubtractSolver(Solver):
 
     def play(self, problem):
@@ -347,8 +317,8 @@ class FactorizeSolver(Solver):
             factor = primes[i]
         self.paper.make_step()
 
+
 __all__ = [
-    'IsPrimeSolver',
     'AddSolver',
     'SubtractSolver',
     'IsDivisibleBySolver',
