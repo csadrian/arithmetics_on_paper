@@ -1,6 +1,6 @@
 import numpy as np
 from solvers import Solver, AddSolver, SIGN_IS_PRIME, SIGN_ADD,\
-    SIGN_YES, SIGN_NO, SIGN_SQRT, IsPrimeSolver, SIGN_IS_DIVISIBLE_BY,\
+    SIGN_YES, SIGN_NO, SIGN_SQRT, SIGN_IS_DIVISIBLE_BY,\
     SIGN_BASE_CONVERSION, SIGN_PRODUCT, SIGN_EQ
 
 from common import number_to_base, is_prime, primes_lt
@@ -10,7 +10,7 @@ class IsPrimeSolverEasy(Solver):
     def play(self, problem):
         n = problem['a']
 
-        is_prime = is_prime(n)
+        is_prime_ = is_prime(n)
 
         self.paper.print_number(n, orientation=-1)
 
@@ -23,7 +23,7 @@ class IsPrimeSolverEasy(Solver):
 
         self.make_step()
 
-        if is_prime:
+        if is_prime_:
             self.paper.print_symbol(SIGN_YES, attention=True, reset=True)
         else:
             self.paper.print_symbol(SIGN_NO, attention=True, reset=True)
@@ -34,7 +34,7 @@ class IsPrimeSolverHard(Solver):
 
     def play(self, problem):
         n = problem['a']
-        is_prime = is_prime(n)
+        is_prime_ = is_prime(n)
 
         self.print_number(n, mark_pos=('number'))
 
@@ -48,7 +48,7 @@ class IsPrimeSolverHard(Solver):
         # ha elég kicsi a szám, akkor tudhatjuk fejből
         if n <= 23:
             self.move_down()
-            sign = SIGN_YES if is_prime else SIGN_NO
+            sign = SIGN_YES if is_prime_ else SIGN_NO
             self.paper.print_symbol(sign, attention=True, reset=True)
             self.paper.make_step()
             return
