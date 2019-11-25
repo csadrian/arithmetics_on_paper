@@ -230,8 +230,7 @@ class AddSolver(Solver):
 
         c = a + b
 
-        self.paper.print_number(a, orientation=-1)
-        self.go_to_mark('start')
+        self.paper.print_number(a, orientation=-1, preserve_pos=True)
         self.move_down()
         self.paper.print_number(b, orientation=-1)
         self.paper.print_symbol(SIGN_ADD, attention=True)
