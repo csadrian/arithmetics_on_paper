@@ -227,21 +227,19 @@ class AddSolver(Solver):
     def play(self, problem):
         a = problem['a']
         b = problem['b']
-        #start = (random.randint(5, 7), random.randint(5, 7))
-        #x, y = start
 
         c = a + b
 
-        self.paper.print_number(a, orientation=0)
+        self.paper.print_number(a, orientation=-1)
+        self.go_to_mark('start')
         self.move_down()
         self.paper.print_number(b, orientation=-1)
-
         self.paper.print_symbol(SIGN_ADD, attention=True)
-
         self.paper.make_step()
-        self.paper.set_attention([(x-1, y)])
-        self.paper.set_attention([(x-2, y)], reset=False)
-        x, y = self.paper.print_number(c, x, y, step_by_step=True)
+        self.go_to_mark('start')
+        self.move_down(2)
+        self.paper.print_number(c, attention=True, orientation=-1, reset=True)
+        self.paper.make_step()
 
 class IsPrimeSolver(Solver):
 
