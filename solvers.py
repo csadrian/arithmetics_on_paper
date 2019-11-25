@@ -246,75 +246,73 @@ class SubtractSolver(Solver):
     def play(self, problem):
         a, b = problem['a'], problem['b']
 
-        start = (random.randint(4, 6), random.randint(4, 6))
-        x, y = start
-
         c = a - b
-        self.paper.print_number(a, x, y)
-        x, y = x + 1, start[1]
-        x, y = self.paper.print_number(b, x, y)
-        self.paper.print_symbol(SIGN_SUB, x, y)
+
+        self.paper.print_number(a, orientation=-1, attention=True)
+        self.go_to_mark('start')
+        self.move_down()
+        self.paper.print_number(b, orientation=-1, attention=True)
+        self.paper.print_symbol(SIGN_SUB, orientation=0, attention=True)
 
         self.paper.make_step()
-        x, y = x + 1, start[1]
-        x, y = self.paper.print_number(c, x, y, step_by_step=True)
+        self.go_to_mark('start')
+        self.move_down(2)
+        self.paper.print_number(c, attention=True, reset=True)
+        self.paper.make_step()
 
 class IsDivisibleBySolver(Solver):
 
     def play(self, problem):
         a, b = problem['a'], problem['b']
 
-        start = (random.randint(4, 6), random.randint(4, 6))
-        x, y = start
+        self.paper.print_number(a)
+        self.go_to_mark('start')
+        self.move_down()
+        self.paper.print_number(b)
+        self.paper.print_symbol(SIGN_IS_DIVISIBLE_BY)
 
-        x, y = self.paper.print_number(b, x, y)
-        x, y = self.paper.print_symbol(SIGN_IS_DIVISIBLE_BY, x, y)
-        x, y = self.paper.print_number(a, x, y)
-
-        x, y = x + 1, start[1]
+        self.move_down()
         self.paper.make_step()
 
         if a % b == 0:
-            self.paper.print_number(1, x, y)
+            self.paper.print_symbol(SIGN_YES, attention=True, reset=True)
         else:
-            self.paper.print_number(0, x, y)
+            self.paper.print_symbol(SIGN_NO, attention=True, reset=True)
 
         self.paper.make_step()
 
 class FactorizeSolver(Solver):
 
-    def __init__(self, limit):
-        self.paper = None
-        self.limit = limit
-
-    def generate(self, data_split=None):
-        a = random.randint(1, self.limit)
-        self.play(a)
-        return self.paper.get_steps()
-
-    def play(self, a):
+    def play(self, problem):
 
         primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53]
+        a = problem['a']
 
-        start = (random.randint(4,6), random.randint(4,6))
-        x, y = start
+        self.paper.print_number(a)
+        self.paper.print_symbol(SIGN_FACTORIZE)
 
-        x, y = self.paper.print_number(a, x, y)
-        x, y = self.paper.print_symbol(SIGN_FACTORIZE, x, y)
+        self.go_to_mark('start')
+        self.move_down()
 
-        #x, y = self.paper.print_number(a, x, y)
-        x, y = x + 1, start[1]
         i = 0
+        j = 0
+
         factor = primes[i]
+
+        self.make_step()
+
         while a != 1:
             while (a % factor == 0) and (a != 1):
-                y = start[1]-3
-                x, y = self.paper.print_symbols_ltr(number_to_base(a) + [SIGN_DIV] + number_to_base(factor), x, y)
+                self.go_to_mark('start')
+                self.move_down(j+1)
+                self.move_right()
+                self.paper.print_symbols_ltr(number_to_base(a) + [SIGN_DIV] + number_to_base(factor), orientation=-1, attention=True, reset=True)
                 self.paper.make_step()
-                x, y = x + 1, start[1]
                 a = a // factor
+                j += 1
             i += 1
             factor = primes[i]
+            self.paper.make_step()
         self.paper.make_step()
 
 
