@@ -9,25 +9,25 @@ class AddSubMultipleSolver(Solver):
         coefs = problem['coefs']
         ops = problem['ops']
 
-        start = (0, 5)
-        x, y = start
+        self.paper._set_position(0, 5)
+        self.paper.mark_current_pos('start')
 
-        x, y = self.paper.print_number(coefs[0], x, y, attention=True, orientation=1, reset=True)
-
-        x, y = x + 1, y - 1
+        self.paper.print_number(coefs[0], orientation=1, reset=True)
+    
+        self.paper.move_down()
+        self.paper.move_left()
         
-        marginx = x
-        marginy = y
+        self.paper.mark_current_pos('margin')
         
         total = coefs[0]
 
         for i in range(len(coefs) - 1):
             
-            x = marginx
-            y = marginy
-            x, y = self.paper.print_number(coefs[i+1], x, y, attention=True)
+            self.paper.go_to_mark('margin')
             
-            self.print_symbol(ops[i], x, y, attention=True)
+            self.paper.print_number(coefs[i+1])
+            
+            self.print_symbol(ops[i])
 
             if ops[i] is 11:
                 self.make_step(solver=AddSolver)
@@ -35,16 +35,18 @@ class AddSubMultipleSolver(Solver):
             else:
                 self.make_step(solver=SubtractSolver)
                 total = total - coefs[i+1]
+            
+            self.paper.go_to_mark('margin')
+            self.paper.move_down()
+            self.paper.mark_current_pos('margin')
 
-            marginx = marginx + 1
-            x = marginx
-            y = marginy
+            self.paper.print_number(total, reset=True, step_by_step=True)
             
+            self.paper.go_to_mark('margin')
+            self.move_down()
+            self.mark_current_pos('margin')
+
             
-            total = total + coefs[i+1]
-            x, y = self.paper.print_number(total, x, y, attention=True, reset=True, step_by_step=True)
-            
-            marginx = marginx + 1
 
 class PlaceValueSolver(Solver):
 
@@ -56,24 +58,22 @@ class PlaceValueSolver(Solver):
 
         self.paper.print_number(number, orientation=1, reset=True)
 
-        self.print_symbol(S.last_digit, attention=True)
+        self.print_symbol(S.last_digit)
 
-        self.paper.print_number(place, orientation=1, attention=True)
+        self.paper.print_number(place, orientation=1)
 
-        pointer = place
-        while pointer > 2:
+        for i in range(1, place + 1):
+
             self.paper.make_step()
-            self.set_paper()
 
-            self.paper._set_position(0, 0)
+            self.paper._set_position(i, 0)
 
-            for i in range(place - pointer):
+            for _ in range(i):
                 self.paper.print_symbol(0)
 
-            self.paper.print_number(int(str(number)[(place-pointer):]))
+            self.paper.print_number(int(str(number)[i:]), orientation=1)
 
             self.paper.print_symbol(S.last_digit)
             
-            self.paper.print_number(pointer, orientation=1)
+            self.paper.print_number(i, orientation=1)
 
-            pointer -= 1
