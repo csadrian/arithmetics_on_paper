@@ -83,6 +83,9 @@ class PaperWithNumbers:
         mark = self._marked_ranges[name]
         self._x, self._y = mark[-1] if end else mark[0]
 
+    def value_at_position(self):
+        return self.paper[self._x, self._y]
+
     @reset_arg
     def set_attention_mark(self, name):
         self.set_attention([self._marked_cells[name]])

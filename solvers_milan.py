@@ -164,3 +164,40 @@ class BaseConversionSolver(Solver):
         self.set_attention_current_pos(reset=True)
         self.make_step()
         return
+
+class SortSolver(Solver):
+
+    def longest_decimal(self, ns):
+        lens = [len(number_to_base(n)) for n in ns]
+        return np.max(lens)
+
+    def set_attention_number(self):
+        # at the last digit of the number
+        while self.value_at_position() != -1:
+            self.set_attention_current_pos()
+            self.move_left()
+
+    def play(self, problem):
+        ns = problem['ns']
+
+        self.print_symbol(S.sort, orientation=0)
+
+        for n in ns:
+            self.move_down()
+            self.print_number(n, orientation=-1, preserve_pos=True)
+
+        self.make_step()
+
+        # starting point of second - sorted - column
+        self.go_to_mark('start')
+        self.move_right(self.longest_decimal(ns)+1)
+        self.move_down()
+        self.print_symbol(1)
+        self.make_step()
+
+        self.go_to_mark('start')
+        self.move_down()
+        self.mark_current_pos('c1')
+        self.set_attention_number()
+        self.make_step()
+        return

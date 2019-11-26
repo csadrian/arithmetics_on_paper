@@ -97,7 +97,6 @@ class IsPrimeProblem(OneNumProblem):
 
 
 class IsPrimeProblemHard(Problem):
-    # 50% prime, 50% not.
     order = 10
 
     def __init__(self, lim_a):
@@ -105,6 +104,15 @@ class IsPrimeProblemHard(Problem):
 
     def generate_one(self):
         return {'a': np.random.randint(self.lim_a)}
+
+class SortProblem(Problem):
+
+    def __init__(self, lim, size=5):
+        self.lim = lim
+        self.size = size
+
+    def generate_one(self):
+        return {'ns': np.random.randint(1, self.lim, size=self.size)}
 
 def _problem_example():
     problem = HardAdditionProblem()
