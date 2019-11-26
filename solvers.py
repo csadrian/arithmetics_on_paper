@@ -365,6 +365,36 @@ class IsDivisibleBySolver(Solver):
 
         self.paper.make_step()
 
+class DivisionSolver(Solver):
+
+    def play(self, problem):
+        a, b = problem['a'], problem['b']
+        self.paper.print_number(a, orientation=1)
+        self.paper._mark_cell('a_end', (self._x, self._y - 1))
+        self.paper.print_symbol(S.div, attention=True)
+        self.paper.print_number(b, orientation=1)
+        self.paper._mark_cell('b_end', (self._x, self._y - 1))
+        self.paper.print_symbol(S.eq, attention=False)
+        self.paper._mark_cell('result_start', (self._x, self._y))
+        self.paper.make_step()
+
+        k = 1
+        a_part = 0
+        while a_part < b and a_part < a:
+            #TODO set attention
+            self.paper.go_to_mark('start')
+            self.move_down(k)
+            a_part = int(str(a)[:k])
+            k+=1
+            self.paper.print_number(a_part, orientation=1)
+            self.paper.make_step(solver='PaircomparisonSolver')
+        if a_part < b:
+            self.paper.go_to_mark('result_start')
+            self.paper.print_number(0, orientation=1)
+            self.paper.make_step(solver='PaircomparisonSolver')
+
+
+
 class FactorizeSolver(Solver):
 
     def play(self, problem):
