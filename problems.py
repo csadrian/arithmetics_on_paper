@@ -77,7 +77,6 @@ class BaseConversion2to3(BaseConversionProblem):
 
 class PaircomparisonProblem(BinaryOperationProblem):
     order = 10
-
     def __init__(self):
         super().__init__(100, 100)
 
@@ -103,6 +102,10 @@ class HardAdditionProblem(AdditionProblem):
     def __init__(self):
         super().__init__(100, 100)
 
+class DivisionProblem(BinaryOperationProblem):
+    order = 20
+    def __init__(self):
+        super().__init__(1000, 1000)
 
 class IsPrimeProblem(OneNumProblem):
     order = 10
@@ -133,5 +136,7 @@ __all__ = [
     'HardAdditionProblem',
     'EasyMultiplicationProblem',
     'HardMultiplicationProblem',
-    'IsPrimeProblem'
+    'IsPrimeProblem',
+    'DivisionProblem',
+    'PaircomparisonProblem'
 ]
