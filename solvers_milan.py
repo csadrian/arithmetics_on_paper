@@ -171,11 +171,8 @@ class SortSolver(Solver):
         lens = [len(number_to_base(n)) for n in ns]
         return np.max(lens)
 
-    def set_attention_number(self):
-        # at the last digit of the number
-        while self.value_at_position() != -1:
-            self.set_attention_current_pos()
-            self.move_left()
+    def get_number_at_position(self, orientation=-1):
+        return int(self.get_word_at_position(orientation))
 
     def play(self, problem):
         ns = problem['ns']
@@ -185,6 +182,8 @@ class SortSolver(Solver):
         for n in ns:
             self.move_down()
             self.print_number(n, orientation=-1, preserve_pos=True)
+
+        self.mark_current_pos('c1_last')
 
         self.make_step()
 
@@ -200,4 +199,19 @@ class SortSolver(Solver):
         self.mark_current_pos('c1')
         self.set_attention_number()
         self.make_step()
+        self.mark_current_pos('c2_first')
+        self.print_symbol(1)
+
+        self.go_to_mark('start')
+        self.move_down()
+        self.mark_current_pos('c1_first')
+        while ns:
+            min = np.min(ns)
+            del ns[ns.index(min)]
+            self.go_to_mark('c2_first')
+            self.print_number(min, attention=True, reset=True)
+            self.go_to_mark('c2_first')
+            self.move_down()
+            self.mark_current_pos('c2_first')
+            self.make_step()
         return

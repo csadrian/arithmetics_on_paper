@@ -37,6 +37,7 @@ class Symbols:
     base_conversion = 20
     product = 21
     eq = 22
+    sort = 24
 
     @classmethod
     def visual(cls, n):
@@ -54,7 +55,8 @@ class Symbols:
             cls.base_conversion: '→b',
             cls.product: '*',
             cls.eq: '=',
+            cls.sort: 'sort',
         }
         for i in range(10):
             symbols[i] = str(i)
-        return symbols[n]
+        return symbols.get(n, '?')
