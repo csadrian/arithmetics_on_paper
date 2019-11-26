@@ -38,7 +38,8 @@ class Symbols:
     product = 21
     eq = 22
     greater = 23
-    last_digit = 24
+    sort = 24
+    last_digit = 25
 
     @classmethod
     def visual(cls, n):
@@ -57,7 +58,8 @@ class Symbols:
             cls.product: '*',
             cls.eq: '=',
             cls.greater: '>',
+            cls.sort: 'sort',
         }
         for i in range(10):
             symbols[i] = str(i)
-        return symbols[n]
+        return symbols.get(n, '?')
