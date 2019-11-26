@@ -37,6 +37,7 @@ class Symbols:
     base_conversion = 20
     product = 21
     eq = 22
+    greater = 23
 
     @classmethod
     def visual(cls, n):
@@ -54,6 +55,7 @@ class Symbols:
             cls.base_conversion: '→b',
             cls.product: '*',
             cls.eq: '=',
+            cls.greater: '>',
         }
         for i in range(10):
             symbols[i] = str(i)

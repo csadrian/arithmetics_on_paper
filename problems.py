@@ -75,6 +75,12 @@ class BaseConversion2to3(BaseConversionProblem):
     def __init__(self):
         super().__init__(100, 2, 3)
 
+class PaircomparisonProblem(BinaryOperationProblem):
+    order = 10
+
+    def __init__(self):
+        super().__init__(100, 100)
+
 class EasyAdditionProblem(AdditionProblem):
     order = 10
     def __init__(self):
@@ -89,7 +95,7 @@ class EasyMultiplicationProblem(MultiplicationProblem):
 class HardMultiplicationProblem(MultiplicationProblem):
     order = 200
     def __init__(self):
-        super().__init__(100, 100)
+        super().__init__(1000, 1000)
 
 
 class HardAdditionProblem(AdditionProblem):
