@@ -38,6 +38,7 @@ class Symbols:
     product = 21
     eq = 22
     greater = 23
+    last_digit = 24
 
     @classmethod
     def visual(cls, n):

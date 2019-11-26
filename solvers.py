@@ -190,6 +190,7 @@ class Solver:
 
     def __init__(self, grid_size):
         self.grid_size = grid_size
+        self.set_paper()
 
     def __getattr__(self, attr):
         return getattr(self.paper, attr)

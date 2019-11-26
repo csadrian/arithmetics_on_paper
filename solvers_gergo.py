@@ -2,6 +2,7 @@ import numpy as np
 from solvers import Solver, AddSolver, SubtractSolver
 from common import Symbols as S
 
+#Need to rewrite to solver handled coordinates
 class AddSubMultipleSolver(Solver):
 
     def play(self, problem):
@@ -45,3 +46,34 @@ class AddSubMultipleSolver(Solver):
             
             marginx = marginx + 1
 
+class PlaceValueSolver(Solver):
+
+    def play(self, problem):
+        number = problem['number']
+        place = problem['place']
+
+        self.paper._set_position(0, 0)
+
+        self.paper.print_number(number, orientation=1, reset=True)
+
+        self.print_symbol(S.last_digit, attention=True)
+
+        self.paper.print_number(place, orientation=1, attention=True)
+
+        pointer = place
+        while pointer > 2:
+            self.paper.make_step()
+            self.set_paper()
+
+            self.paper._set_position(0, 0)
+
+            for i in range(place - pointer):
+                self.paper.print_symbol(0)
+
+            self.paper.print_number(int(str(number)[(place-pointer):]))
+
+            self.paper.print_symbol(S.last_digit)
+            
+            self.paper.print_number(pointer, orientation=1)
+
+            pointer -= 1

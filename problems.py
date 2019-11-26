@@ -68,6 +68,15 @@ class AddSubMultipleProblem(Problem):
                 'ops' : [np.random.randint(11, 12) for i in range(len(self.lim) - 1)]        
                 }
 
+class PlaceValueProblem(Problem):
+    #for a given lim the maximal number generated is 10^{lim}
+    def __init__(self, lim):
+        self.lim = lim
+
+    def generate_one(self):
+        return {'number' : np.random.randint(10 **(self.lim)),
+                'place' : np.random.randint(1, self.lim)}
+
 # NON-ABSTRACT CLASSES
 class BaseConversion2to3(BaseConversionProblem):
     order = 10
