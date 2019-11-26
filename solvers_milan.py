@@ -191,16 +191,14 @@ class SortSolver(Solver):
         self.go_to_mark('start')
         self.move_right(self.longest_decimal(ns)+1)
         self.move_down()
-        self.print_symbol(1)
+        self.mark_current_pos('c2_first')
         self.make_step()
 
         self.go_to_mark('start')
         self.move_down()
         self.mark_current_pos('c1')
-        self.set_attention_number()
+        self.set_attention_word()
         self.make_step()
-        self.mark_current_pos('c2_first')
-        self.print_symbol(1)
 
         self.go_to_mark('start')
         self.move_down()
