@@ -83,6 +83,20 @@ class PaperWithNumbers:
         mark = self._marked_ranges[name]
         self._x, self._y = mark[-1] if end else mark[0]
 
+    def _value_at_position(self, x, y):
+        return self.paper[x, y]
+
+    def value_at_position(self):
+        return self._value_at_position(self._x, self._y)
+
+    def get_marks_at_pos(self):
+        x, y = self._x, self._y
+        res = []
+        for mark in self._marked_cells:
+            if self._marked_cells[mark] == (x, y):
+                res += mark
+        return res
+
     @reset_arg
     def set_attention_mark(self, name):
         self.set_attention([self._marked_cells[name]])
@@ -185,6 +199,31 @@ class PaperWithNumbers:
 
     def move_up(self, n=1):
         return self.move_down(-1*n)
+
+    def _word_at_position(self, orientation=-1):
+        # word: sequence of symbols without empty sign
+        self.mark_current_pos('gcn')
+        res = []
+        while self.value_at_position() in range(10):
+            res.append((self._x, self._y))
+            self.move_right(orientation)
+        self.go_to_mark('gcn')
+        if orientation < 0:
+            res = reversed(res)
+        return res
+
+    def set_attention_word(self, orientation=-1):
+        # at the last digit of the number
+        self.set_attention(self._word_at_position(orientation))
+
+    def get_word_at_position(self, orientation=-1):
+        res = []
+        for cell in self._word_at_position(orientation):
+            res.append(self._value_at_position(*cell))
+        return ''.join(map(str, res))
+
+    def get_number_at_position(self, orientation=-1):
+        return int(self.get_word_at_position(orientation))
 
 class Solver:
 
