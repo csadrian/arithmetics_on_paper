@@ -312,7 +312,7 @@ class MultiplySolver(Solver):
             r = m * a * 10**k
             rs.append(r)
             # TODO set attention # self.paper.set_attention()
-            self.paper._set_position(self._marked_cells['a_end'][0], self._marked_cells['a_end'][1])
+            self.paper.go_to_mark('a_end')
             self.move_down(k+1)
             self.paper.print_number(r, orientation=-1)
             self.paper.make_step()
@@ -323,7 +323,7 @@ class MultiplySolver(Solver):
         # TODO set attention
         self.paper.print_symbol(S.add, orientation=-1, attention=True)
         self.paper.make_step()
-        self.paper._set_position(self._marked_cells['a_end'][0], self._marked_cells['a_end'][1])
+        self.paper.go_to_mark('a_end')
         self.move_down(k+1)
         final_result = np.sum(rs)
         self.paper.print_number(final_result, orientation=-1)
