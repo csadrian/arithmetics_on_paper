@@ -111,8 +111,10 @@ class PaperWithNumbers:
     def remove_attention_mark_range(self, name):
         self.remove_attention(self._marked_ranges[name])
 
-    def mark_current_pos(self, name):
-        self._mark_cell(name, (self._x, self._y))
+    def mark_current_pos(self, name, vertical_offset=0, horizontal_offset=0):
+        self._mark_cell(
+            name,
+            (self._x + vertical_offset, self._y + horizontal_offset))
 
     @reset_arg
     def set_attention_current_pos(self):
@@ -295,10 +297,10 @@ class MultiplySolver(Solver):
         c = a * b
 
         self.paper.print_number(a, orientation=1)
-        self.paper._mark_cell('a_end', (self._x, self._y - 1))
+        self.paper.mark_current_pos('a_end', horizontal_offset=-1)
         self.paper.print_symbol(S.product, attention=True)
         self.paper.print_number(b, orientation=1)
-        self.paper._mark_cell('b_end', (self._x, self._y - 1))
+        self.paper.mark_current_pos('b_end', horizontal_offset=-1)
         self.paper.make_step()
 
         b_copy = b
@@ -370,12 +372,12 @@ class DivisionSolver(Solver):
     def play(self, problem):
         a, b = problem['a'], problem['b']
         self.paper.print_number(a, orientation=1)
-        self.paper._mark_cell('a_end', (self._x, self._y - 1))
+        self.paper.mark_current_pos('a_end', horizontal_offset=-1)
         self.paper.print_symbol(S.div, attention=True)
         self.paper.print_number(b, orientation=1)
-        self.paper._mark_cell('b_end', (self._x, self._y - 1))
+        self.paper.mark_current_pos('b_end', horizontal_offset=-1)
         self.paper.print_symbol(S.eq, attention=False)
-        self.paper._mark_cell('result_start', (self._x, self._y))
+        self.paper.mark_current_pos('result_start')
         self.paper.make_step()
 
         k = 1
