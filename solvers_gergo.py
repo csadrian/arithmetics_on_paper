@@ -8,7 +8,6 @@ class AddSubMultipleSolver(Solver):
         coefs = problem['coefs']
         ops = problem['ops']
 
-        self.paper._set_position(0, 5)
         self.paper.mark_current_pos('start')
 
         self.paper.print_number(coefs[0], orientation=1, reset=True)
@@ -52,8 +51,6 @@ class PlaceValueSolver(Solver):
     def play(self, problem):
         number = problem['number']
         place = problem['place']
-
-        self.paper._set_position(0, 0)
 
         self.paper.print_number(number, orientation=1, reset=True)
 

@@ -1,3 +1,4 @@
+import types
 from solvers import *
 import solvers
 from solvers_milan import *
@@ -17,8 +18,15 @@ def _plot_paper(array, ax, diff=None, attention=None, transform=True):
     nrows, ncols = array.shape
     ax.set_xlim([0, ncols])
     ax.set_ylim([0, nrows])
-    ax.set_xticks(range(ncols+1))
-    ax.set_yticks(range(nrows+1))
+    xticks = list(range(ncols))
+    yticks = list(range(nrows))
+    xticklabels = [2*' ' + l + ' ' for l in map(str, reversed(xticks))]
+    yticklabels = [l for l in map(str, reversed(yticks))]
+    ax.set_xticks(xticks)
+    ax.set_xticklabels(xticklabels, ha='left')
+    ax.set_yticks(yticks)
+    ax.set_yticklabels(yticklabels, va='bottom')
+
     ax.grid(True)
     if attention is None:
         attention = np.zeros((ncols, nrows))
