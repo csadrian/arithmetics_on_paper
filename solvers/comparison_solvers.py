@@ -18,3 +18,53 @@ class PaircomparisonSolver(Solver):
         else:
             self.paper.print_symbol(S.no, attention=True, reset=True)
         self.paper.make_step()
+
+
+class SortSolver(Solver):
+
+    def longest_decimal(self, ns):
+        lens = [len(number_to_base(n)) for n in ns]
+        return np.max(lens)
+
+    def get_number_at_position(self, orientation=-1):
+        return int(self.get_word_at_position(orientation))
+
+    def play(self, problem):
+        ns = problem['ns']
+
+        self.print_symbol(S.sort, orientation=0)
+
+        for n in ns:
+            self.move_down()
+            self.print_number(n, orientation=-1, preserve_pos=True)
+
+        self.mark_current_pos('c1_last')
+
+        self.make_step()
+
+        # starting point of second - sorted - column
+        self.go_to_mark('start')
+        self.move_right(self.longest_decimal(ns)+1)
+        self.move_down()
+        self.mark_current_pos('c2_first')
+        self.make_step()
+
+        self.go_to_mark('start')
+        self.move_down()
+        self.mark_current_pos('c1')
+        self.set_attention_word()
+        self.make_step()
+
+        self.go_to_mark('start')
+        self.move_down()
+        self.mark_current_pos('c1_first')
+        while ns:
+            min = np.min(ns)
+            del ns[ns.index(min)]
+            self.go_to_mark('c2_first')
+            self.print_number(min, attention=True, reset=True)
+            self.go_to_mark('c2_first')
+            self.move_down()
+            self.mark_current_pos('c2_first')
+            self.make_step()
+        return
