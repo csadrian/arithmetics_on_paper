@@ -1,6 +1,6 @@
 import numpy as np
 from .solver import Solver
-from common import number_to_base, is_prime, primes_lt, Symbols as S
+from utils import number_to_base, is_prime, primes_lt, Symbols as S
 
 
 class BaseConversionSolver(Solver):

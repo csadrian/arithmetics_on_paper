@@ -1,9 +1,10 @@
 import types
-from solvers import *
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
-from common import Symbols as S
+from solvers import *
+from utils import Symbols as S
+
 
 def _plot_paper(array, ax, diff=None, attention=None, transform=True):
     if transform:

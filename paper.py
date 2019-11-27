@@ -1,5 +1,5 @@
 import numpy as np
-from common import number_to_base
+from utils import number_to_base
 
 
 class Step:

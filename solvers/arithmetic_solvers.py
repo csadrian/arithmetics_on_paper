@@ -1,6 +1,6 @@
 import numpy as np
 from .solver import Solver
-from common import Symbols as S
+from utils import Symbols as S
 
 
 class AddSolver(Solver):
