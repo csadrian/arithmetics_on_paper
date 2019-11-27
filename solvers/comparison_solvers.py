@@ -1,5 +1,6 @@
+import numpy as np
 from .solver import Solver
-from common import Symbols as S
+from common import number_to_base, Symbols as S
 
 
 class PaircomparisonSolver(Solver):

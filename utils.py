@@ -1,8 +1,5 @@
 import types
 from solvers import *
-import solvers
-from solvers_milan import *
-import solvers_milan
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np

@@ -1,3 +1,4 @@
+import numpy as np
 from .solver import Solver
 from common import Symbols as S
 
