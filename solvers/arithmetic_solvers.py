@@ -110,3 +110,46 @@ class DivisionSolver(Solver):
             self.paper.go_to_mark('result_start')
             self.paper.print_number(0, orientation=1)
             self.paper.make_step(solver='PaircomparisonSolver')
+
+
+class AddSubMultipleSolver(Solver):
+
+    def play(self, problem):
+        coefs = problem['coefs']
+        ops = problem['ops']
+
+        self.paper.mark_current_pos('start')
+
+        self.paper.print_number(coefs[0], orientation=1, reset=True)
+    
+        self.paper.move_down()
+        self.paper.move_left()
+        
+        self.paper.mark_current_pos('margin')
+        
+        total = coefs[0]
+
+        for i in range(len(coefs) - 1):
+            
+            self.paper.go_to_mark('margin')
+            
+            self.paper.print_number(coefs[i+1])
+            
+            self.print_symbol(ops[i])
+
+            if ops[i] is 11:
+                self.make_step(solver='AddSolver')
+                total = total + coefs[i+1]
+            else:
+                self.make_step(solver='SubtractSolver')
+                total = total - coefs[i+1]
+            
+            self.paper.go_to_mark('margin')
+            self.paper.move_down()
+            self.paper.mark_current_pos('margin')
+
+            self.paper.print_number(total, reset=True, step_by_step=True)
+            
+            self.paper.go_to_mark('margin')
+            self.move_down()
+            self.mark_current_pos('margin')
