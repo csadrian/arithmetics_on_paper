@@ -155,5 +155,5 @@ __all__ = [
     'HardMultiplicationProblem',
     'IsPrimeProblem',
     'DivisionProblem',
-    'PaircomparisonProblem'
+    'PaircomparisonProblem',
 ]

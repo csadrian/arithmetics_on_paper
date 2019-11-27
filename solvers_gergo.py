@@ -2,7 +2,6 @@ import numpy as np
 from solvers import Solver, AddSolver, SubtractSolver
 from common import Symbols as S
 
-#Need to rewrite to solver handled coordinates
 class AddSubMultipleSolver(Solver):
 
     def play(self, problem):
@@ -76,4 +75,41 @@ class PlaceValueSolver(Solver):
             self.paper.print_symbol(S.last_digit)
             
             self.paper.print_number(i, orientation=1)
+
+class DivRemainderSolver(Solver):
+
+    def play(self, problem):
+        a = problem['a']
+        b = problem['b']
+
+        self.paper._set_position(0, 0)
+
+        self.paper.print_number(a, orientation=1, reset=True)
+
+        self.paper.move_left()
+        self.paper.mark_current_pos('margin')
+        
+        self.paper.move_right()
+
+        self.paper.print_symbol(S.remainder)
+
+        self.paper.print_number(b, orientation=1)
+        
+        self.paper.make_step()
+
+        for i in range(int((a - a % b) / b)):
+            self.paper.go_to_mark('margin')
+            self.paper.move_down()
+            self.paper.mark_current_pos('margin')
+            
+            self.paper.print_number(b, orientation=-1)
+            self.paper.print_symbol(12, orientation=-1)
+
+            self.paper.go_to_mark('margin')
+            self.paper.move_down()
+            self.paper.mark_current_pos('margin')
+            
+            self.paper.make_step(solver=SubtractSolver)
+
+            self.paper.print_number(a - b * (i + 1))
 

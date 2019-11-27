@@ -40,6 +40,7 @@ class Symbols:
     greater = 23
     sort = 24
     last_digit = 25
+    remainder = 26
 
     @classmethod
     def visual(cls, n):
