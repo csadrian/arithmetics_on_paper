@@ -2,9 +2,7 @@ import numpy as np
 import random
 import tensorflow as tf
 import tensorflow.keras.layers as layers
-import problems
-import solvers_milan as solvers
-# import tensorflow_datasets as tfds
+import problems, solvers
 
 
 def generate_with_generators(generators, N, grid_size):

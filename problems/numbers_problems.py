@@ -1,5 +1,5 @@
 import numpy as np
-from .problems import *
+from .problem import *
 
 
 class BaseConversionProblem(Problem):
