@@ -1,5 +1,5 @@
 import numpy as np
-from utils import number_to_base
+from utils import number_to_base, Symbols as S
 
 
 class Step:
@@ -35,15 +35,25 @@ def reset_arg(func):
 
 class PaperWithNumbers:
 
-    def __init__(self, grid_size, startx=0, starty=5):
+    def __init__(self, grid_size, startx=2, starty=5):
         self.shape = (grid_size, grid_size)
         self.paper = -1*np.ones(shape=self.shape, dtype=np.int32)
+
         self.reset_attention()
         self.steps = []
-        self._x = startx
-        self._y = starty
         self._marked_cells = dict()
         self._marked_ranges = dict()
+
+        self._mark_cell('question', (0, 0))
+        self.go_to_mark('question')
+        self.print_symbol(S.question)
+        self._mark_cell('answer', (1, 1))
+        self.go_to_mark('answer')
+        self.move_left()
+        self.print_symbol(S.answer, orientation=-1)
+
+        self._x = startx
+        self._y = starty
         self.mark_current_pos('start')
 
     def reset_attention(self):
