@@ -41,6 +41,11 @@ class Symbols:
     sort = 24
     last_digit = 25
     remainder = 26
+    question = 27
+    answer = 28
+    decimal = 29
+    end = 30
+    comma = 31
 
     @classmethod
     def visual(cls, n):
@@ -60,6 +65,11 @@ class Symbols:
             cls.eq: '=',
             cls.greater: '>',
             cls.sort: 'sort',
+            cls.question: 'Q:',
+            cls.answer: 'A:',
+            cls.end: '∎',
+            cls.decimal: '.',
+            cls.comma: ','
         }
         for i in range(10):
             symbols[i] = str(i)
