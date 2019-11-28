@@ -45,9 +45,7 @@ class SubtractSolver(Solver):
 class MultiplySolver(Solver):
 
     def play(self, problem):
-        a = problem['a']
-        b = problem['b']
-
+        a,b = problem['a'], problem['b']
         c = a * b
 
         self.paper.print_number(a, orientation=1)
@@ -57,12 +55,11 @@ class MultiplySolver(Solver):
         self.paper.mark_current_pos('b_end', horizontal_offset=-1)
         self.paper.make_step()
 
-        b_copy = b
         k = 0
         rs = []
 
-        while b_copy != 0:
-            m = b_copy % 10
+        while b != 0:
+            m = b % 10
             r = m * a * 10**k
             rs.append(r)
             # TODO set attention # self.paper.set_attention()
@@ -71,7 +68,7 @@ class MultiplySolver(Solver):
             self.paper.print_number(r, orientation=-1)
             self.paper.make_step()
 
-            b_copy = b_copy // 10
+            b = b // 10
             k += 1
 
         # TODO set attention
@@ -79,9 +76,13 @@ class MultiplySolver(Solver):
         self.paper.make_step()
         self.paper.go_to_mark('a_end')
         self.move_down(k+1)
-        final_result = np.sum(rs)
-        self.paper.print_number(final_result, orientation=-1)
+        result = np.sum(rs)
+        self.paper.print_number(result, orientation=-1)
         self.paper.make_step(solver='AddSolver')
+        self.go_to_mark('answer')
+        self.paper.print_number(result, orientation=1)
+        self.paper.print_symbol(S.end)
+        self.paper.make_step()
 
 
 class DivisionSolver(Solver):

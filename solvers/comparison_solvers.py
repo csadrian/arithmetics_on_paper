@@ -16,8 +16,14 @@ class PaircomparisonSolver(Solver):
         self.move_down()
         if a > b:
             self.paper.print_symbol(S.yes, attention=True, reset=True)
+            result = S.yes
         else:
             self.paper.print_symbol(S.no, attention=True, reset=True)
+            result = S.no
+        self.paper.make_step()
+        self.go_to_mark('answer')
+        self.paper.print_symbol(result)
+        self.paper.print_symbol(S.end)
         self.paper.make_step()
 
 
