@@ -113,7 +113,7 @@ class MultiplySolver(Solver):
 
         # TODO set attention
         rsum = np.sum(rs)
-        if len(rsum) > 1:
+        if len(rs) > 1:
             self.paper.print_symbol(S.add, orientation=-1, attention=True)
             self.paper.make_step()
             self.paper.go_to_mark('a_end')
