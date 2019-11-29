@@ -22,6 +22,8 @@ import collections
 import textwrap
 
 import inspect
+import generators
+import mathematics_dataset.example as example
 
 # Dependency imports
 from absl import app
@@ -36,8 +38,8 @@ from six.moves import range
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string('filter', '', 'restrict to matching module names')
-flags.DEFINE_integer('per_train_module', 10, 'Num of examples per train module')
-flags.DEFINE_integer('per_test_module', 10, 'Num of examples per test module')
+flags.DEFINE_integer('per_train_module', 2, 'Num of examples per train module')
+flags.DEFINE_integer('per_test_module', 2, 'Num of examples per test module')
 flags.DEFINE_bool('show_dropped', False, 'Whether to print dropped questions')
 
 
@@ -156,6 +158,7 @@ def main(unused_argv):
       width=80, initial_indent=' ', subsequent_indent='  ')
 
   for regime, flat_modules in six.iteritems(filtered_modules):
+    example.solutions = collections.defaultdict(list)
     per_module = counts[regime]
     for module_name, module in six.iteritems(flat_modules):
       # These magic print constants make the header bold.
@@ -169,7 +172,10 @@ def main(unused_argv):
         print(text)
       if num_dropped > 0:
         logging.warning('Dropped %d examples', num_dropped)
-
+    for module_name, module_solutions in example.solutions.items():
+      for solutions in module_solutions:
+        records = generators.solutions_to_pairs(module_solutions)
+        generators.write_tfrecords(records, 'test1.' + module_name + "." + regime)
 
 if __name__ == '__main__':
   app.run(main)

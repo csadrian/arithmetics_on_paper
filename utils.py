@@ -58,7 +58,7 @@ class Symbols:
             cls.is_divisible_by: '|',
             cls.factorize: 'fact',
             cls.div: ':',
-            -1: ' ',
+            0: ' ',
             cls.yes: '✓',
             cls.no: 'X',
             cls.sqrt: '√',
@@ -75,6 +75,6 @@ class Symbols:
             cls.fraction: '/',
             cls.percentage: '%'
         }
-        for i in range(10):
-            symbols[i] = str(i)
+        for i in range(1, 11):
+            symbols[i] = str(i-1)
         return symbols.get(n, '?')

@@ -9,6 +9,8 @@ import os
 import params
 import generators
 from utils import Symbols
+import paper
+import display
 
 args = params.getArgs()
 print(args)
@@ -19,13 +21,13 @@ print(args)
 tf.compat.v1.enable_eager_execution()
 
 NUM_SYMBOLS = 32
-GRID_SIZE = 15
+GRID_SIZE = 20
 
 dataset_prefix = os.path.join(args.dataset_path, args.dataset)
 
 xy_train =  generators.sup_dataset_from_tfrecords([dataset_prefix+'.train.tfrecords'])
-xy_val   =  generators.sup_dataset_from_tfrecords([dataset_prefix+'.val.tfrecords'])
-xy_test  =  generators.sup_dataset_from_tfrecords([dataset_prefix+'.test.tfrecords'])
+xy_val   =  generators.sup_dataset_from_tfrecords([dataset_prefix+'.interpolate.tfrecords'])
+xy_test  =  generators.sup_dataset_from_tfrecords([dataset_prefix+'.extrapolate.tfrecords'])
 
 # Instantiate a simple classification model
 inp = tf.keras.layers.Input(shape=(GRID_SIZE, GRID_SIZE, NUM_SYMBOLS))
@@ -69,7 +71,7 @@ def preprocess_test(ds):
 
 train_dataset = preprocess(xy_train).repeat()
 val_dataset = preprocess(xy_val).repeat()
-test_dataset = preprocess_test(xy_test)
+test_dataset = preprocess_test(xy_train)
 
 model.fit(train_dataset,
           validation_data=val_dataset,
@@ -89,8 +91,14 @@ x_test = np.array(x_test)
 preds = model.predict(x_test)
 
 for i in range(10):
-    print(np.argmax(x_test[i], axis=-1))
-    print(np.argmax(preds[i], axis=-1))
+    paper_x = np.argmax(x_test[i], axis=-1)
+    paper_pred = np.argmax(preds[i], axis=-1)
+    step1 = paper.Step(paper=paper_x, attention=None)
+    step1.paper = paper_x
+    step2 = paper.Step(paper=paper_pred, attention=None)
+    step2.paper = paper_pred
+    display.plot_steps([step1, step2], title=str(i))
+
 
 
 """

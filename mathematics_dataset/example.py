@@ -38,13 +38,15 @@ problem_to_solver = {
     'MultiplicationProblem' : MultiplySolver
 }
 
+solutions = collections.defaultdict(list)
 
-def generate_solution(problem, question):
-  print(problem)
+def generate_solution(problem, question, name):
   solver = problem_to_solver['MultiplicationProblem'](20)
   solver.play(problem)
   steps = solver.get_steps()
-  display.plot_steps(steps, title=question)
+  solutions[name].append(steps)
+
+  # display.plot_steps(steps, title=question)
 
 def question(context, template, **kwargs):
   """Makes a question, using the given context and template.
@@ -81,7 +83,7 @@ def question(context, template, **kwargs):
     if stack[i].function == 'sample_from_module':
         module = stack[i-1].function
   if module in module_to_problem:
-      generate_solution(module_to_problem[module](kwargs), prefix + template.format(**kwargs))
+      generate_solution(module_to_problem[module](kwargs), prefix + template.format(**kwargs), module)
   return prefix + template.format(**kwargs)
 
 
