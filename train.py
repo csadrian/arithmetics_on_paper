@@ -53,8 +53,9 @@ model.compile(optimizer=optimizer,
               metrics=[accuracy])
 
 # Instantiate some callbacks
-callbacks = [tf.keras.callbacks.ModelCheckpoint(filepath=args.model_path,
-                                                save_best_only=True)]
+callbacks = []
+if args.model_path is not None:
+    callbacks.append(tf.keras.callbacks.ModelCheckpoint(filepath=args.model_path, save_best_only=True))
 
 def preprocess(ds):
     ds = ds.batch(50)
@@ -77,7 +78,8 @@ model.fit(train_dataset,
           steps_per_epoch=1000,
           callbacks=callbacks)
 
-model.save(args.model_path)
+if args.model_path is not None:
+    model.save(args.model_path)
 
 np.set_printoptions(threshold=sys.maxsize)
 

@@ -38,7 +38,7 @@ class PaperWithNumbers:
 
     def __init__(self, grid_size, startx=2, starty=5):
         self.shape = (grid_size, grid_size)
-        self.paper = -1*np.ones(shape=self.shape, dtype=np.int32)
+        self.paper = np.zeros(shape=self.shape, dtype=np.int32)
 
         self.reset_attention()
         self.steps = []
@@ -188,7 +188,7 @@ class PaperWithNumbers:
             n_in_base.reverse()
         for i in range(len(n_in_base)):
             offset = i * orientation
-            self.paper[x, y + offset] = n_in_base[-(i+1)]
+            self.paper[x, y + offset] = n_in_base[-(i+1)] + 1
             if attention:
                 self.attention[x, y + offset] = 1
             if step_by_step:
