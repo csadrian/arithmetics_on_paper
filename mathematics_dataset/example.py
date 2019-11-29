@@ -25,13 +25,14 @@ import inspect
 
 from mathematics_dataset.util import composition
 
-import sys
-sys.path.insert(0,'..')
-import problems
+from problems.arithmetic_problems import MultiplicationProblem
 
 module_to_problem = {
-  'mul': problems.MultiplicationProblem
+  'mul': MultiplicationProblem
 }
+
+def generate_solution(problem):
+  print(problem)
 
 def question(context, template, **kwargs):
   """Makes a question, using the given context and template.
@@ -68,7 +69,7 @@ def question(context, template, **kwargs):
     if stack[i].function == 'sample_from_module':
         module = stack[i-1].function
 
-  print(module)
+  module_to_problem[module](kwargs)
   return prefix + template.format(**kwargs)
 
 
