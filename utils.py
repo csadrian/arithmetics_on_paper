@@ -46,6 +46,8 @@ class Symbols:
     decimal = 29
     end = 30
     comma = 31
+    fraction = 32
+    percentage = 33
 
     @classmethod
     def visual(cls, n):
@@ -55,7 +57,7 @@ class Symbols:
             cls.is_prime: 'p?',
             cls.is_divisible_by: '|',
             cls.factorize: 'fact',
-            cls.div: '/',
+            cls.div: ':',
             -1: ' ',
             cls.yes: '✓',
             cls.no: 'X',
@@ -67,9 +69,11 @@ class Symbols:
             cls.sort: 'sort',
             cls.question: 'Q:',
             cls.answer: 'A:',
-            cls.end: '∎',
             cls.decimal: '.',
-            cls.comma: ','
+            cls.end: '∎',
+            cls.comma: ',',
+            cls.fraction: '/',
+            cls.percentage: '%'
         }
         for i in range(10):
             symbols[i] = str(i)
