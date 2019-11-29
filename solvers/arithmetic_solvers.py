@@ -57,13 +57,16 @@ class MultiplySolver(Solver):
     def _check_sign(self, a, b):
         if a < 0 and b < 0:
             sign = 1
-            a, b = abs(a), abs(b)
+            #a, b = abs(a), abs(b)
+            a, b = a.__neg__(), b.__neg__()
         elif a < 0:
             sign = -1
-            a = abs(a)
+            #a = abs(a)
+            a = a.__neg__()
         elif b < 0:
             sign = -1
-            b = abs(b)
+            #b = abs(b)
+            b = b.__neg__()
         else:
             sign = 1
         return a, b, sign
@@ -77,6 +80,7 @@ class MultiplySolver(Solver):
         a, b = problem.params['p'], problem.params['q']
         #a, b = problem['a'], problem['b']
         nb_dec = 0
+        a, b, sign = self._check_sign(a, b)
         if isinstance(a, _Decimal) or isinstance(b, _Decimal):
             self.paper.print_number(a._decimal, orientation=1)
             self.paper.print_symbol(S.product, attention=True)
@@ -87,7 +91,7 @@ class MultiplySolver(Solver):
             a, a_nb_dec = self._decimal_to_int(a)
             b, b_nb_dec = self._decimal_to_int(b)
             nb_dec = a_nb_dec + b_nb_dec
-        a, b, sign = self._check_sign(a, b)
+        #a, b, sign = self._check_sign(a, b)
 
         self.paper.print_number(a, orientation=1, step_by_step=step_by_step)
         self.paper.mark_current_pos('a_end', horizontal_offset=-1)
