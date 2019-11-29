@@ -112,13 +112,15 @@ class MultiplySolver(Solver):
             k += 1
 
         # TODO set attention
-        self.paper.print_symbol(S.add, orientation=-1, attention=True)
-        self.paper.make_step()
-        self.paper.go_to_mark('a_end')
-        self.move_down(k+1)
         rsum = np.sum(rs)
-        self.paper.print_number(rsum, orientation=-1, step_by_step=step_by_step)
-        self.paper.make_step(solver='AddSolver')
+        if len(rsum) > 1:
+            self.paper.print_symbol(S.add, orientation=-1, attention=True)
+            self.paper.make_step()
+            self.paper.go_to_mark('a_end')
+            self.move_down(k+1)
+            self.paper.print_number(rsum, orientation=-1, step_by_step=step_by_step)
+            self.paper.make_step(solver='AddSolver')
+
         if nb_dec > 0:
             result = Decimal(str(rsum / 10 **(nb_dec)))
             self.move_down()
