@@ -1,4 +1,5 @@
 import numpy as np
+import decimal #, sympy
 from utils import number_to_base, Symbols as S
 
 
@@ -168,8 +169,20 @@ class PaperWithNumbers:
     @print_func
     @reset_arg
     def print_number(self, n, step_by_step=False, attention=False, 
-                     orientation=-1, mark_pos=False):
+                      orientation=-1, mark_pos=False):
         x, y = self._x, self._y
+        #if isinstance(n, sympy.Rational):
+        #    nominator, denominator = [int(item) for item in str(n).split('/')]
+        #    print_number(nominator, step_by_step, attention, orientation, mark_pos)
+        #    print_symbol(S.fraction, attention, orientation, mark_pos)
+        #    print_number(denominator, step_by_step, attention, orientation, mark_pos)
+        #    return
+        if isinstance(n, decimal.Decimal):
+            integer, fractional = [int(item) for item in str(n).split('.')]
+            self.print_number(integer, step_by_step, attention, orientation, mark_pos)
+            self.print_symbol(S.decimal, attention, orientation, mark_pos)
+            self.print_number(fractional, step_by_step, attention, orientation, mark_pos)
+            return
         n_in_base = number_to_base(n)
         if orientation > 0:
             n_in_base.reverse()

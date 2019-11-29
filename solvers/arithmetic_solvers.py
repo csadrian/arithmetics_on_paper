@@ -1,4 +1,5 @@
 import numpy as np
+import decimal
 from .solver import Solver
 from utils import Symbols as S
 
@@ -43,10 +44,22 @@ class SubtractSolver(Solver):
 
 
 class MultiplySolver(Solver):
+    def count_decimals_and_convert(self, d):
+        if isinstance(d, decimal.Decimal):
+            nb_decimals = abs(d.as_tuple().exponent)
+            d = d * 10 ** nb_decimals
+            return d, nb_decimals
+        else:
+            return d, 0
+
 
     def play(self, problem):
-        a,b = problem['a'], problem['b']
-        c = a * b
+        a, b = problem['a'], problem['b']
+        a, a_nb_dec = self.count_decimals_and_convert(a)
+        b, b_nb_dec = self.count_decimals_and_convert(b)
+        nb_dec = a_nb_dec + b_nb_dec
+
+        result = a * b * 10 ** (-nb_dec)
 
         self.paper.print_number(a, orientation=1)
         self.paper.mark_current_pos('a_end', horizontal_offset=-1)
@@ -76,7 +89,7 @@ class MultiplySolver(Solver):
         self.paper.make_step()
         self.paper.go_to_mark('a_end')
         self.move_down(k+1)
-        result = np.sum(rs)
+        #result = np.sum(rs)
         self.paper.print_number(result, orientation=-1)
         self.paper.make_step(solver='AddSolver')
         self.go_to_mark('answer')
