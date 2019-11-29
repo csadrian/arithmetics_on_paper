@@ -38,8 +38,8 @@ from six.moves import range
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string('filter', '', 'restrict to matching module names')
-flags.DEFINE_integer('per_train_module', 2, 'Num of examples per train module')
-flags.DEFINE_integer('per_test_module', 2, 'Num of examples per test module')
+flags.DEFINE_integer('per_train_module', 1000, 'Num of examples per train module')
+flags.DEFINE_integer('per_test_module', 1000, 'Num of examples per test module')
 flags.DEFINE_bool('show_dropped', False, 'Whether to print dropped questions')
 
 
@@ -158,9 +158,9 @@ def main(unused_argv):
       width=80, initial_indent=' ', subsequent_indent='  ')
 
   for regime, flat_modules in six.iteritems(filtered_modules):
-    example.solutions = collections.defaultdict(list)
     per_module = counts[regime]
     for module_name, module in six.iteritems(flat_modules):
+      example.solutions = collections.defaultdict(list)    
       # These magic print constants make the header bold.
       print('\033[1m{}/{}\033[0m'.format(regime, module_name))
       num_dropped = 0
@@ -172,8 +172,7 @@ def main(unused_argv):
         print(text)
       if num_dropped > 0:
         logging.warning('Dropped %d examples', num_dropped)
-    for module_name, module_solutions in example.solutions.items():
-      for solutions in module_solutions:
+      for module_name, module_solutions in example.solutions.items():
         records = generators.solutions_to_pairs(module_solutions)
         generators.write_tfrecords(records, 'test1.' + module_name + "." + regime)
 

@@ -20,8 +20,8 @@ print(args)
 
 tf.compat.v1.enable_eager_execution()
 
-NUM_SYMBOLS = 32
-GRID_SIZE = 20
+NUM_SYMBOLS = 33
+GRID_SIZE = 12
 
 dataset_prefix = os.path.join(args.dataset_path, args.dataset)
 
@@ -32,8 +32,8 @@ xy_test  =  generators.sup_dataset_from_tfrecords([dataset_prefix+'.extrapolate.
 # Instantiate a simple classification model
 inp = tf.keras.layers.Input(shape=(GRID_SIZE, GRID_SIZE, NUM_SYMBOLS))
 
-out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(inp)
-out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
+out = layers.Conv2D(256, (5,5), padding='same', activation=tf.nn.relu)(inp)
+out = layers.Conv2D(256, (5,5), padding='same', activation=tf.nn.relu)(out)
 out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
@@ -42,8 +42,20 @@ out = layers.Conv2D(NUM_SYMBOLS, (3,3), padding='same')(out)
 model = tf.keras.Model(inputs=inp, outputs=out)
 
 # Instantiate a logistic loss function that expects integer targets.
-loss = tf.keras.losses.MeanSquaredError()
+loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True, label_smoothing=0.0)
 
+"""
+eps = 1e-8
+def my_loss(y_true, y_pred):
+    ans = -(y_true*tf.log(y_pred + eps) + (1-y_true)*tf.log(y_pred + eps))
+    return ans
+def xxmy_loss(y_true, y_pred):
+    #ans =  tf.square(y_true-y_pred) * tf.boolean_mask(y_true, tf.equal(y_true, 0)) * 0.0001 
+    #ans += tf.square(y_true-y_pred) * tf.boolean_mask(y_true, tf.not_equal(y_true, 0)) * 0.0001 
+    ans =  tf.square(tf.softmax(y_true-y_pred) * (y_true != 0) * 1.0 
+    ans += tf.square(y_true-y_pred) * (y_true == 0) * 0.00000     
+    return ans
+"""    
 # Instantiate an accuracy metric.
 accuracy = tf.keras.metrics.CategoricalAccuracy()
 
@@ -61,6 +73,7 @@ if args.model_path is not None:
 
 def preprocess(ds):
     ds = ds.batch(50)
+    ds = ds.shuffle(10000)
     ds = ds.map(lambda x, y: (tf.one_hot(x, NUM_SYMBOLS, axis=-1), tf.one_hot(y, NUM_SYMBOLS, axis=-1)))
     return ds
 
@@ -71,12 +84,12 @@ def preprocess_test(ds):
 
 train_dataset = preprocess(xy_train).repeat()
 val_dataset = preprocess(xy_val).repeat()
-test_dataset = preprocess_test(xy_train)
+test_dataset = preprocess_test(xy_val)
 
 model.fit(train_dataset,
           validation_data=val_dataset,
           validation_steps=100,
-          epochs=1,
+          epochs=5,
           steps_per_epoch=1000,
           callbacks=callbacks)
 

@@ -32,9 +32,9 @@ from mathematics_dataset.util import display
 import sympy
 
 
-_ENTROPY_TRAIN = (3, 10)
-_ENTROPY_INTERPOLATE = (8, 8)
-_ENTROPY_EXTRAPOLATE = (10, 12)
+_ENTROPY_TRAIN = (3, 4)
+_ENTROPY_INTERPOLATE = (3, 4)
+_ENTROPY_EXTRAPOLATE = (5, 6)
 
 _ADD_SUB_ENTROPY_TRAIN = (4, 16)
 _ADD_SUB_ENTROPY_INTERPOLATE = (12, 12)
