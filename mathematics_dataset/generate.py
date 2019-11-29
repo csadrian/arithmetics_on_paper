@@ -38,8 +38,8 @@ from six.moves import range
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string('filter', '', 'restrict to matching module names')
-flags.DEFINE_integer('per_train_module', 2, 'Num of examples per train module')
-flags.DEFINE_integer('per_test_module', 2, 'Num of examples per test module')
+flags.DEFINE_integer('per_train_module', 100, 'Num of examples per train module')
+flags.DEFINE_integer('per_test_module', 100, 'Num of examples per test module')
 flags.DEFINE_bool('show_dropped', False, 'Whether to print dropped questions')
 
 
