@@ -31,6 +31,11 @@ module_to_problem = {
   'mul': MultiplicationProblem
 }
 
+
+problem_to_solution = {
+  'mul': MultiplicationProblem
+}
+
 def generate_solution(problem):
   print(problem)
 
@@ -68,8 +73,8 @@ def question(context, template, **kwargs):
   for i in range(len(stack)):
     if stack[i].function == 'sample_from_module':
         module = stack[i-1].function
-
-  module_to_problem[module](kwargs)
+  if module in module_to_problem:
+      generate_solution(module_to_problem[module](kwargs))
   return prefix + template.format(**kwargs)
 
 
