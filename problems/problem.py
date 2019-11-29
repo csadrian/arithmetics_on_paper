@@ -13,9 +13,10 @@ class Problem:
 
 class BinaryOperationProblem(Problem):
 
-    def __init__(self, lim_a, lim_b):
-        self.lim_a = lim_a
-        self.lim_b = lim_b
+    def __init__(self, params):
+        #self.lim_a = lim_a
+        #self.lim_b = lim_b
+        self.params = params
 
     def generate_one(self):
         return {'a': np.random.randint(self.lim_a),

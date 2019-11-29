@@ -26,18 +26,25 @@ import inspect
 from mathematics_dataset.util import composition
 
 from problems.arithmetic_problems import MultiplicationProblem
+from solvers.arithmetic_solvers import MultiplySolver
+import display
 
 module_to_problem = {
   'mul': MultiplicationProblem
 }
 
 
-problem_to_solution = {
-  'mul': MultiplicationProblem
+problem_to_solver = {
+    'MultiplicationProblem' : MultiplySolver
 }
 
-def generate_solution(problem):
+
+def generate_solution(problem, question):
   print(problem)
+  solver = problem_to_solver['MultiplicationProblem'](20)
+  solver.play(problem)
+  steps = solver.get_steps()
+  display.plot_steps(steps, title=question)
 
 def question(context, template, **kwargs):
   """Makes a question, using the given context and template.
@@ -74,7 +81,7 @@ def question(context, template, **kwargs):
     if stack[i].function == 'sample_from_module':
         module = stack[i-1].function
   if module in module_to_problem:
-      generate_solution(module_to_problem[module](kwargs))
+      generate_solution(module_to_problem[module](kwargs), prefix + template.format(**kwargs))
   return prefix + template.format(**kwargs)
 
 

@@ -1,7 +1,15 @@
-import types
+import matplotlib
+matplotlib.use('Agg')
+import seaborn as sns
 import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
 import numpy as np
+import os
+import re
+plt.style.use('seaborn-deep')
+
+import types
+from matplotlib.lines import Line2D
+
 from solvers import *
 from utils import Symbols as S
 
@@ -57,7 +65,7 @@ def plot_last_step(steps):
     _plot_paper(steps[-1], ax)
     fig.show()
 
-def plot_steps(steps, ncols=None):
+def plot_steps(steps, ncols=None, title='Solution steps on paper'):
     if ncols is None:
         ncols = 1 if len(steps) <= 2 else 2
     nrows = int(np.ceil(len(steps)/ncols))
@@ -78,4 +86,6 @@ def plot_steps(steps, ncols=None):
         axes[i].set_title(f"{i+1}. step:")
         _plot_paper(step['paper'], axes[i], diff=diff,
                     attention=step['attention'])
-    fig.show()
+    fig.savefig(title + '.png', bbox_inches='tight')
+    #plt.clf()
+    #fig.show()
