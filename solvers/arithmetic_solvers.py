@@ -71,7 +71,7 @@ class MultiplySolver(Solver):
     def play(self, problem, verbosity=1):
         if verbosity == 1:
             step_by_step = False
-        elif verbosity == 0:
+        elif verbosity == 2:
             step_by_step = True
         a, b = problem.params['p'], problem.params['q']
         #a, b = problem['a'], problem['b']
