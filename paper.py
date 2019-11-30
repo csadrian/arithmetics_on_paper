@@ -177,6 +177,9 @@ class PaperWithNumbers:
         #    print_symbol(S.fraction, attention, orientation, mark_pos)
         #    print_number(denominator, step_by_step, attention, orientation, mark_pos)
         #    return
+        if n < 0:
+            n = n.__mul__(-1)
+            self.print_symbol(S.sub, attention, orientation, mark_pos)
         if isinstance(n, decimal.Decimal) and len(str(n).split('.')) == 2:
             integer, fractional = [int(item) for item in str(n).split('.')]
             self.print_number(integer, step_by_step, attention, orientation, mark_pos)
