@@ -156,12 +156,14 @@ class PaperWithNumbers:
 
     @print_func
     @reset_arg
-    def print_symbol(self, n, attention=False,
+    def print_symbol(self, n, step_by_step=False, attention=False,
                      orientation=1, mark_pos=False):
         x, y = self._x, self._y
         self.paper[x, y] = n
         if attention:
             self.attention[x, y] = 1
+        if step_by_step:
+            self.make_step()
         if mark_pos:
             self._mark_cell(mark_pos, (self._x, self._y))
         self._set_position(x, y+orientation)
@@ -169,7 +171,7 @@ class PaperWithNumbers:
     @print_func
     @reset_arg
     def print_number(self, n, step_by_step=False, attention=False, 
-                      orientation=-1, mark_pos=False):
+                      orientation=-1, mark_pos=False, solver=None):
         x, y = self._x, self._y
         #if isinstance(n, sympy.Rational):
         #    nominator, denominator = [int(item) for item in str(n).split('/')]
@@ -179,11 +181,11 @@ class PaperWithNumbers:
         #    return
         if n < 0:
             n = n.__mul__(-1)
-            self.print_symbol(S.sub, attention, orientation, mark_pos)
+            self.print_symbol(S.sub, step_by_step, attention, orientation, mark_pos)
         if isinstance(n, decimal.Decimal) and len(str(n).split('.')) == 2:
             integer, fractional = [int(item) for item in str(n).split('.')]
             self.print_number(integer, step_by_step, attention, orientation, mark_pos)
-            self.print_symbol(S.decimal, attention, orientation, mark_pos)
+            self.print_symbol(S.decimal, step_by_step, attention, orientation, mark_pos)
             self.print_number(fractional, step_by_step, attention, orientation, mark_pos)
             return
         n_in_base = number_to_base(n)
@@ -195,7 +197,7 @@ class PaperWithNumbers:
             if attention:
                 self.attention[x, y + offset] = 1
             if step_by_step:
-                self.make_step()
+                self.make_step(solver=solver)
         if mark_pos:
             res = []
             for i in range(len(n_in_base)):

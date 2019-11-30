@@ -71,7 +71,7 @@ class MultiplySolver(Solver):
             sign = 1
         return a, b, sign
 
-    def play(self, problem, verbosity=1):
+    def play(self, problem, verbosity=2):
         if verbosity == 1:
             step_by_step = False
         elif verbosity >= 2:
@@ -79,11 +79,11 @@ class MultiplySolver(Solver):
 
         a, b = problem.params['p'], problem.params['q']
         #a, b = problem['a'], problem['b']
+
         nb_dec = 0
-        #a, b, sign = self._check_sign(a, b)
         if isinstance(a, _Decimal) or isinstance(b, _Decimal):
             self.paper.print_number(a._decimal, orientation=1)
-            self.paper.print_symbol(S.product, attention=True)
+            self.paper.print_symbol(S.product, orientation=1, attention=True)
             self.paper.print_number(b._decimal, orientation=1)
             self.paper.make_step()
             self.paper.go_to_mark('start')
@@ -91,11 +91,12 @@ class MultiplySolver(Solver):
             a, a_nb_dec = self._decimal_to_int(a)
             b, b_nb_dec = self._decimal_to_int(b)
             nb_dec = a_nb_dec + b_nb_dec
+
         a, b, sign = self._check_sign(a, b)
 
         self.paper.print_number(a, orientation=1, step_by_step=step_by_step)
         self.paper.mark_current_pos('a_end', horizontal_offset=-1)
-        self.paper.print_symbol(S.product, attention=True)
+        self.paper.print_symbol(S.product, orientation=1, step_by_step=step_by_step, attention=True)
         self.paper.print_number(b, orientation=1, step_by_step=step_by_step)
         self.paper.mark_current_pos('b_end', horizontal_offset=-1)
         self.paper.make_step()
@@ -132,19 +133,21 @@ class MultiplySolver(Solver):
             self.paper.make_step()
             self.paper.go_to_mark('a_end')
             self.move_down(l + 1)
-            self.paper.print_number(rsum, orientation=-1, step_by_step=step_by_step)
-            self.paper.make_step(solver='AddSolver')
+            self.paper.print_number(rsum, orientation=-1, step_by_step=step_by_step, solver='AddSolver')
+            #self.paper.make_step(solver='AddSolver')
 
         if nb_dec > 0:
             result = Decimal(str(rsum / 10 **(nb_dec)))
             self.move_down()
             self.print_number(result, orientation=1, step_by_step=step_by_step)
-            self.paper.make_step()
+            #self.paper.make_step()
         else:
             result = rsum
+
         self.go_to_mark('answer')
         if sign == -1:
             self.paper.print_symbol(S.sub, orientation=1)
+            self.paper.make_step()
         self.paper.print_number(result, orientation=1, step_by_step=step_by_step)
         self.paper.print_symbol(S.end)
         self.paper.make_step()
