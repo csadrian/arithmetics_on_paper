@@ -12,6 +12,8 @@ from utils import Symbols
 import paper
 import display
 
+from attn_augconv import AttentionAugmentation2D, augmented_conv2d
+
 args = params.getArgs()
 print(args)
 
@@ -21,7 +23,7 @@ print(args)
 tf.compat.v1.enable_eager_execution()
 
 NUM_SYMBOLS = 33
-GRID_SIZE = 18
+GRID_SIZE = 22
 
 dataset_prefix = os.path.join(args.dataset_path, args.dataset)
 
@@ -29,14 +31,35 @@ xy_train =  generators.sup_dataset_from_tfrecords([dataset_prefix+'.train.tfreco
 xy_val   =  generators.sup_dataset_from_tfrecords([dataset_prefix+'.interpolate.tfrecords'])
 xy_test  =  generators.sup_dataset_from_tfrecords([dataset_prefix+'.extrapolate.tfrecords'])
 
+
 # Instantiate a simple classification model
 inp = tf.keras.layers.Input(shape=(GRID_SIZE, GRID_SIZE, NUM_SYMBOLS))
 
-out = layers.Conv2D(256, (5,5), padding='same', activation=tf.nn.relu)(inp)
-out = layers.Conv2D(256, (5,5), padding='same', activation=tf.nn.relu)(out)
-out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
-out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
-out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
+out = layers.Conv2D(64, (3,3), padding='same', activation=tf.nn.relu)(inp)
+
+
+out = augmented_conv2d(out, filters=200, kernel_size=(3, 3),
+                         depth_k=0.2, depth_v=0.2,  # dk/v (0.2) * f_out (20) = 4
+                         num_heads=4, relative_encodings=True)
+out = layers.Activation('relu')(out)
+
+out = layers.Conv2D(64, (3,3), padding='same', activation=tf.nn.relu)(out)
+out = layers.BatchNormalization()(out)
+
+out = augmented_conv2d(out, filters=200, kernel_size=(3, 3),
+                         depth_k=0.2, depth_v=0.2,  # dk/v (0.2) * f_out (20) = 4
+                         num_heads=4, relative_encodings=True)
+out = layers.Activation('relu')(out)
+#out = layers.BatchNormalization()(out)
+
+#out = layers.Conv2D(256, (5,5), padding='same', activation=tf.nn.relu)(out)
+#out = layers.Conv2D(2 * depth_k + depth_v, (5,5), padding='same', activation=tf.nn.relu)(out)
+#out = AttentionAugmentation2D(depth_k, depth_v, num_heads)(out)
+
+
+#out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
+#out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
+#out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 out = layers.Conv2D(NUM_SYMBOLS, (3,3), padding='same')(out)
 
 model = tf.keras.Model(inputs=inp, outputs=out)
