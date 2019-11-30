@@ -173,21 +173,18 @@ class PaperWithNumbers:
     def print_number(self, n, step_by_step=False, attention=False, 
                       orientation=-1, mark_pos=False, solver=None):
         x, y = self._x, self._y
-        #if isinstance(n, sympy.Rational):
-        #    nominator, denominator = [int(item) for item in str(n).split('/')]
-        #    print_number(nominator, step_by_step, attention, orientation, mark_pos)
-        #    print_symbol(S.fraction, attention, orientation, mark_pos)
-        #    print_number(denominator, step_by_step, attention, orientation, mark_pos)
-        #    return
         if n < 0:
             n = n.__mul__(-1)
             self.print_symbol(S.sub, step_by_step, attention, orientation, mark_pos)
         if isinstance(n, decimal.Decimal) and len(str(n).split('.')) == 2:
-            integer, fractional = [int(item) for item in str(n).split('.')]
-            self.print_number(integer, step_by_step, attention, orientation, mark_pos)
+            integer_str, fractional_str = [item for item in str(n).split('.')]
+            for letter in integer_str:
+                self.print_symbol(int(letter) + 1, step_by_step, attention, orientation, mark_pos)
             self.print_symbol(S.decimal, step_by_step, attention, orientation, mark_pos)
-            self.print_number(fractional, step_by_step, attention, orientation, mark_pos)
+            for letter in fractional_str:
+                self.print_symbol(int(letter) + 1, step_by_step, attention, orientation, mark_pos)
             return
+
         n_in_base = number_to_base(n)
         if orientation > 0:
             n_in_base.reverse()

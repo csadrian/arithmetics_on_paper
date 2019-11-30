@@ -57,15 +57,12 @@ class MultiplySolver(Solver):
     def _check_sign(self, a, b):
         if a < 0 and b < 0:
             sign = 1
-            #a, b = abs(a), abs(b)
             a, b = a.__neg__(), b.__neg__()
         elif a < 0:
             sign = -1
-            #a = abs(a)
             a = a.__neg__()
         elif b < 0:
             sign = -1
-            #b = abs(b)
             b = b.__neg__()
         else:
             sign = 1
@@ -78,28 +75,27 @@ class MultiplySolver(Solver):
             step_by_step = True
 
         a, b = problem.params['p'], problem.params['q']
-        #a, b = problem['a'], problem['b']
 
         nb_dec = 0
-        if isinstance(a, _Decimal) or isinstance(b, _Decimal):
-            self.paper.print_number(a._decimal, orientation=1)
-            self.paper.print_symbol(S.product, orientation=1, attention=True)
-            self.paper.print_number(b._decimal, orientation=1)
-            self.paper.make_step()
-            self.paper.go_to_mark('start')
-            self.move_down()
-            a, a_nb_dec = self._decimal_to_int(a)
-            b, b_nb_dec = self._decimal_to_int(b)
-            nb_dec = a_nb_dec + b_nb_dec
+        self.paper.go_to_mark('question')
+        self.move_right(2)
+        self.paper.print_number(a._decimal, orientation=1)
+        self.paper.print_symbol(S.product, orientation=1, attention=True)
+        self.paper.print_number(b._decimal, orientation=1)
+        self.paper.make_step()
+
+        a, a_nb_dec = self._decimal_to_int(a)
+        b, b_nb_dec = self._decimal_to_int(b)
+        nb_dec = a_nb_dec + b_nb_dec
 
         a, b, sign = self._check_sign(a, b)
 
+        self.paper.go_to_mark('start')
         self.paper.print_number(a, orientation=1, step_by_step=step_by_step)
         self.paper.mark_current_pos('a_end', horizontal_offset=-1)
         self.paper.print_symbol(S.product, orientation=1, step_by_step=step_by_step, attention=True)
         self.paper.print_number(b, orientation=1, step_by_step=step_by_step)
         self.paper.mark_current_pos('b_end', horizontal_offset=-1)
-        self.paper.make_step()
 
         k_a, k_b = 0, 0
         l = 0
@@ -114,11 +110,10 @@ class MultiplySolver(Solver):
                 a_digit = a_copy % 10
                 r = b_digit * a_digit * 10**(k_a + k_b)
                 rs.append(r)
-                # TODO set attention # self.paper.set_attention()
+                # TODO set attention
                 self.paper.go_to_mark('a_end')
                 self.move_down(l + 1)
                 self.paper.print_number(r, orientation=-1, step_by_step=step_by_step)
-                self.paper.make_step()
 
                 a_copy = a_copy // 10
                 k_a += 1
@@ -134,13 +129,11 @@ class MultiplySolver(Solver):
             self.paper.go_to_mark('a_end')
             self.move_down(l + 1)
             self.paper.print_number(rsum, orientation=-1, step_by_step=step_by_step, solver='AddSolver')
-            #self.paper.make_step(solver='AddSolver')
 
         if nb_dec > 0:
             result = Decimal(str(rsum / 10 **(nb_dec)))
             self.move_down()
             self.print_number(result, orientation=1, step_by_step=step_by_step)
-            #self.paper.make_step()
         else:
             result = rsum
 
