@@ -78,11 +78,10 @@ class MultiplySolver(Solver):
 
         nb_dec = 0
         self.paper.go_to_mark('question')
-        self.move_right(2)
+        self.move_right()
         self.paper.print_number(a._decimal, orientation=1)
         self.paper.print_symbol(S.product, orientation=1, attention=True)
         self.paper.print_number(b._decimal, orientation=1)
-        self.paper.make_step()
 
         a, a_nb_dec = self._decimal_to_int(a)
         b, b_nb_dec = self._decimal_to_int(b)
@@ -128,12 +127,14 @@ class MultiplySolver(Solver):
             self.paper.make_step()
             self.paper.go_to_mark('a_end')
             self.move_down(l + 1)
+            l += 1
             self.paper.print_number(rsum, orientation=-1, step_by_step=step_by_step, solver='AddSolver')
 
         if nb_dec > 0:
             result = Decimal(str(rsum / 10 **(nb_dec)))
-            self.move_down()
-            self.print_number(result, orientation=1, step_by_step=step_by_step)
+            self.paper.go_to_mark('a_end')
+            self.move_down(l + 1)
+            self.print_number(result, orientation=-1, step_by_step=step_by_step)
         else:
             result = rsum
 

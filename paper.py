@@ -105,6 +105,10 @@ class PaperWithNumbers:
                 res += mark
         return res
 
+    def _check_cell_emptiness(self, pos):
+        if self.paper[pos[0], pos[1]] != 0:
+            print("Warning: content of a non-empty grid cell is going to be overwritten on the paper!")
+
     @reset_arg
     def set_attention_mark(self, name):
         self.set_attention([self._marked_cells[name]])
@@ -141,6 +145,7 @@ class PaperWithNumbers:
         if orientation < 0:
             ns.reverse()
         for i, symbol in enumerate(ns):
+            self._check_cell_emptiness((x, y))
             self.paper[x, y] = symbol
             if attention:
                 self.attention[x, y] = 1
@@ -159,6 +164,7 @@ class PaperWithNumbers:
     def print_symbol(self, n, step_by_step=False, attention=False,
                      orientation=1, mark_pos=False):
         x, y = self._x, self._y
+        self._check_cell_emptiness((x, y))
         self.paper[x, y] = n
         if attention:
             self.attention[x, y] = 1
@@ -166,7 +172,7 @@ class PaperWithNumbers:
             self.make_step()
         if mark_pos:
             self._mark_cell(mark_pos, (self._x, self._y))
-        self._set_position(x, y+orientation)
+        self._set_position(x, y + orientation)
 
     @print_func
     @reset_arg
@@ -174,14 +180,23 @@ class PaperWithNumbers:
                       orientation=-1, mark_pos=False, solver=None):
         x, y = self._x, self._y
         if n < 0:
+            self.print_symbol(S.sub, orientation=1, step_by_step=step_by_step)
             n = n.__mul__(-1)
-            self.print_symbol(S.sub, step_by_step, attention, orientation, mark_pos)
         if isinstance(n, decimal.Decimal) and len(str(n).split('.')) == 2:
             integer_str, fractional_str = [item for item in str(n).split('.')]
-            for letter in integer_str:
+            if orientation < 0:
+                part1, part2 = fractional_str[::-1], integer_str[::-1]
+            else:
+                part1, part2 = integer_str, fractional_str
+            for letter in part1:
                 self.print_symbol(int(letter) + 1, step_by_step, attention, orientation, mark_pos)
             self.print_symbol(S.decimal, step_by_step, attention, orientation, mark_pos)
-            for letter in fractional_str:
+            for letter in part2:
+                self.print_symbol(int(letter) + 1, step_by_step, attention, orientation, mark_pos)
+            return
+        elif isinstance(n, decimal.Decimal) and str(n).isdigit():
+            integer_str = str(n)
+            for letter in integer_str:
                 self.print_symbol(int(letter) + 1, step_by_step, attention, orientation, mark_pos)
             return
 
@@ -190,6 +205,7 @@ class PaperWithNumbers:
             n_in_base.reverse()
         for i in range(len(n_in_base)):
             offset = i * orientation
+            self._check_cell_emptiness((x, y + offset))
             self.paper[x, y + offset] = n_in_base[-(i+1)] + 1
             if attention:
                 self.attention[x, y + offset] = 1
