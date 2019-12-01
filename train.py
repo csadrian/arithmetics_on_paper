@@ -50,6 +50,13 @@ out = augmented_conv2d(out, filters=200, kernel_size=(3, 3),
                          depth_k=0.2, depth_v=0.2,  # dk/v (0.2) * f_out (20) = 4
                          num_heads=4, relative_encodings=True)
 out = layers.Activation('relu')(out)
+
+
+out = augmented_conv2d(out, filters=200, kernel_size=(3, 3),
+                         depth_k=0.2, depth_v=0.2,  # dk/v (0.2) * f_out (20) = 4
+                         num_heads=4, relative_encodings=True)
+out = layers.Activation('relu')(out)
+
 #out = layers.BatchNormalization()(out)
 
 #out = layers.Conv2D(256, (5,5), padding='same', activation=tf.nn.relu)(out)
@@ -59,7 +66,7 @@ out = layers.Activation('relu')(out)
 
 #out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 #out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
-out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
+#out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 out = layers.Conv2D(NUM_SYMBOLS, (3,3), padding='same')(out)
 
 model = tf.keras.Model(inputs=inp, outputs=out)

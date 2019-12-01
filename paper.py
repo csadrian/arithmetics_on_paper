@@ -36,7 +36,7 @@ def reset_arg(func):
 
 class PaperWithNumbers:
 
-    def __init__(self, grid_size, startx=2, starty=5):
+    def __init__(self, grid_size, startx=3, starty=8):
         self.shape = (grid_size, grid_size)
         self.paper = np.zeros(shape=self.shape, dtype=np.int32)
 

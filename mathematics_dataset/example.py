@@ -41,7 +41,7 @@ problem_to_solver = {
 solutions = collections.defaultdict(list)
 
 def generate_solution(problem, question, name):
-  solver = problem_to_solver['MultiplicationProblem'](22)
+  solver = problem_to_solver['MultiplicationProblem'](40)
   solver.play(problem, verbosity=2)
   steps = solver.get_steps()
   solutions[name].append(steps)
