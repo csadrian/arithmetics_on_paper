@@ -112,7 +112,7 @@ test_dataset = preprocess_test(xy_val)
 model.fit(train_dataset,
           validation_data=val_dataset,
           validation_steps=100,
-          epochs=5,
+          epochs=25,
           steps_per_epoch=1000,
           callbacks=callbacks)
 

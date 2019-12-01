@@ -38,8 +38,8 @@ from six.moves import range
 FLAGS = flags.FLAGS
 
 flags.DEFINE_string('filter', '', 'restrict to matching module names')
-flags.DEFINE_integer('per_train_module', 1000, 'Num of examples per train module')
-flags.DEFINE_integer('per_test_module', 1000, 'Num of examples per test module')
+flags.DEFINE_integer('per_train_module', 5000, 'Num of examples per train module')
+flags.DEFINE_integer('per_test_module', 5000, 'Num of examples per test module')
 flags.DEFINE_bool('show_dropped', False, 'Whether to print dropped questions')
 
 
@@ -160,6 +160,9 @@ def main(unused_argv):
   for regime, flat_modules in six.iteritems(filtered_modules):
     per_module = counts[regime]
     for module_name, module in six.iteritems(flat_modules):
+      print(module_name)
+      if module_name != "arithmetic__mul":
+        continue
       example.solutions = collections.defaultdict(list)    
       # These magic print constants make the header bold.
       print('\033[1m{}/{}\033[0m'.format(regime, module_name))
