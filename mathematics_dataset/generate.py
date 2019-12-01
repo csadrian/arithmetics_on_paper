@@ -161,7 +161,7 @@ def main(unused_argv):
     per_module = counts[regime]
     for module_name, module in six.iteritems(flat_modules):
       print(module_name)
-      if module_name != "arithmetic__mul":
+      if module_name not in ["arithmetic__mul", "arithmetic__mul_big"] :
         continue
       example.solutions = collections.defaultdict(list)    
       # These magic print constants make the header bold.

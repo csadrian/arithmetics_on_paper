@@ -59,7 +59,7 @@ out = layers.Activation('relu')(out)
 
 #out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 #out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
-#out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
+out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 out = layers.Conv2D(NUM_SYMBOLS, (3,3), padding='same')(out)
 
 model = tf.keras.Model(inputs=inp, outputs=out)
