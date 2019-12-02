@@ -25,7 +25,6 @@ print(args)
 
 tf.compat.v1.enable_eager_execution()
 
-NUM_SYMBOLS = 33
 GRID_SIZE = 22
 
 dataset_prefix = os.path.join(args.dataset_path, args.dataset)
@@ -36,7 +35,7 @@ xy_test  =  generators.sup_dataset_from_tfrecords([dataset_prefix+'.extrapolate.
 
 
 # Instantiate a simple classification model
-inp = tf.keras.layers.Input(shape=(GRID_SIZE, GRID_SIZE, NUM_SYMBOLS))
+inp = tf.keras.layers.Input(shape=(GRID_SIZE, GRID_SIZE, Symbols.NUM_SYMBOLS))
 
 out = layers.Conv2D(64, (3,3), padding='same', activation=tf.nn.relu)(inp)
 
@@ -69,7 +68,7 @@ out = layers.Activation('relu')(out)
 #out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 #out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 #out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
-out = layers.Conv2D(NUM_SYMBOLS, (3,3), padding='same')(out)
+out = layers.Conv2D(Symbols.NUM_SYMBOLS, (3,3), padding='same')(out)
 
 model = tf.keras.Model(inputs=inp, outputs=out)
 
@@ -124,12 +123,12 @@ callbacks.append(FocusCallback())
 def preprocess(ds):
     ds = ds.batch(args.batch_size, drop_remainder=True).prefetch(100)
     ds = ds.shuffle(10000)
-    ds = ds.map(lambda x, y: (tf.one_hot(x, NUM_SYMBOLS, axis=-1), tf.one_hot(y, NUM_SYMBOLS, axis=-1)))
+    ds = ds.map(lambda x, y: (tf.one_hot(x, Symbols.NUM_SYMBOLS, axis=-1), tf.one_hot(y, Symbols.NUM_SYMBOLS, axis=-1)))
     return ds
 
 def preprocess_test(ds):
     ds = ds.shuffle(10000)
-    ds = ds.map(lambda x, y: tf.one_hot(x, NUM_SYMBOLS, axis=-1))
+    ds = ds.map(lambda x, y: tf.one_hot(x, Symbols.NUM_SYMBOLS, axis=-1))
     return ds
 
 train_dataset = preprocess(xy_train).repeat()
