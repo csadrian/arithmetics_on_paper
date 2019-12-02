@@ -11,13 +11,16 @@ from attn_augconv import AttentionAugmentation2D, augmented_conv2d
 from utils import Symbols
 import params
 import generators
+#from tensorflow.keras.utils.generic_utils import get_custom_objects
 
 args = params.getArgs()
 print(args)
 
+
 dataset = generators.sup_dataset_from_tfrecords([os.path.join(args.dataset_path, args.dataset) + args.split + '.tfrecords'])
 
-model = tf.keras.models.load_model(os.path.join(args.model_path, args.model_name), custom_objects={'AttentionAugmentation2D': AttentionAugmentation2D})
+#get_custom_objects().update({"weighted_loss": tensorflow.keras.losses.mse})
+model = tf.keras.models.load_model(os.path.join(args.model_path, args.model_name), custom_objects={'AttentionAugmentation2D': AttentionAugmentation2D, 'weighted_loss': tf.keras.losses.mse})
 #model = tf.keras.models.load_model(os.path.join(args.model_path, args.model_name))
 
 # Check its architecture

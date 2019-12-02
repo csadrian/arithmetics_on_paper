@@ -40,13 +40,12 @@ inp = tf.keras.layers.Input(shape=(GRID_SIZE, GRID_SIZE, NUM_SYMBOLS))
 
 out = layers.Conv2D(64, (3,3), padding='same', activation=tf.nn.relu)(inp)
 
-
 out = augmented_conv2d(out, filters=200, kernel_size=(3, 3),
                          depth_k=0.2, depth_v=0.2,  # dk/v (0.2) * f_out (20) = 4
                          num_heads=4, relative_encodings=True)
 out = layers.Activation('relu')(out)
 
-out = layers.Conv2D(64, (3,3), padding='same', activation=tf.nn.relu)(out)
+out = layers.Conv2D(68, (3,3), padding='same', activation=tf.nn.relu)(out)
 out = layers.BatchNormalization()(out)
 
 out = augmented_conv2d(out, filters=200, kernel_size=(3, 3),
