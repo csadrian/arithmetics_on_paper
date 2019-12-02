@@ -5,6 +5,10 @@ from utils import number_to_base, is_prime, primes_lt, Symbols as S
 
 class BaseConversionSolver(Solver):
 
+    def _print_number_in_base(self, num, base, **kwargs):
+        num_in_base = [int(digit) + 1 for digit in number_to_base(num, base)]
+        self.print_symbols_ltr(num_in_base, **kwargs)
+
     def play(self, problem):
         # TODO: only works with b2=10!!
         n = problem['n']
@@ -14,10 +18,8 @@ class BaseConversionSolver(Solver):
         num_in_b1 = number_to_base(n, b1)
         num_in_b2 = number_to_base(n, b2)
 
-        self.print_symbols_ltr(
-            num_in_b1, attention=True, mark_pos='num',
-            orientation=1
-        )
+        self._print_number_in_base(n, b1, attention=True, mark_pos='num',
+                                   orientation=1)
         self.make_step()
 
         self.go_to_mark('start')
@@ -31,26 +33,25 @@ class BaseConversionSolver(Solver):
         self.go_to_mark_range('num')
         self.move_down(2)
 
-        num_in_by_rev = num_in_b1.copy()
-        num_in_by_rev.reverse()
+        num_in_b1_rev = num_in_b1.copy()
+        num_in_b1_rev.reverse()
 
-        for i, digit in enumerate(num_in_by_rev):
+        for i, digit in enumerate(num_in_b1_rev):
             self.mark_current_pos('s')
             # TODO why 3?
             self.move_left(3)
             self.print_symbol(S.add)
             self.print_number(digit, orientation=1)
             self.print_symbol(S.product, orientation=1)
-            self.print_symbols_ltr(
-                number_to_base(b1**i, b=b2), orientation=1)
+            self._print_number_in_base(
+                b1**i, base=b2, orientation=1)
             self.print_symbol(S.eq, orientation=1)
             self.print_number(b1**i*digit, orientation=1)
             self.make_step()
             self.go_to_mark('s')
             self.move_down()
 
-        self.print_symbols_ltr(num_in_b2, attention=True,
-                               reset=True)
+        self._print_number_in_base(n, b2, attention=True, reset=True)
         self.paper.make_step()
         self.go_to_mark('base_conversion_sign')
         self.move_down()
@@ -249,9 +250,11 @@ class FactorizeSolver(Solver):
                 self.go_to_mark('start')
                 self.move_down(j+1)
                 self.move_right()
+                self.paper.print_number(a, orientation=-1, attention=True)
                 self.paper.print_symbols_ltr(
-                    number_to_base(a) + [S.div] + number_to_base(factor),
+                    [S.div],
                     orientation=-1, attention=True, reset=True)
+                self.paper.print_number(factor, orientation=-1, attention=True)
                 self.paper.make_step()
                 a = a // factor
                 j += 1
