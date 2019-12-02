@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('Agg')
+
 import numpy as np
 import random
 import tensorflow as tf
@@ -86,10 +89,11 @@ def xxmy_loss(y_true, y_pred):
     return ans
 """    
 
+bg_weight = tf.Variable(0.0)
 cc_loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True, label_smoothing=0.0)
 
 def weighted_loss(y_true, y_pred):
-    weights = tf.ones([args.batch_size, GRID_SIZE, GRID_SIZE]) * 0.01 + tf.clip_by_value(tf.reduce_sum(y_true, axis=-1), 0.0, 1.0)
+    weights = tf.ones([args.batch_size, GRID_SIZE, GRID_SIZE]) * bg_weight + tf.clip_by_value(tf.reduce_sum(y_true, axis=-1), 0.0, 1.0)
     return cc_loss(y_true, y_pred, weights)
     #a = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_true, logits=y_pred, axis=-1)
     #return tf.reduce_sum(a * weights)
@@ -105,10 +109,18 @@ model.compile(optimizer=optimizer,
               loss=weighted_loss,
               metrics=[accuracy])
 
+
+class FocusCallback(tf.keras.callbacks.Callback):
+  def on_epoch_begin(self, epoch, logs=None):
+    if epoch > 1:
+       bg_weight.assign(0.01)
+       print("bg weight: {}".format(bg_weight.read_value()))
+
 # Instantiate some callbacks
 callbacks = []
 if args.model_path is not None:
     callbacks.append(tf.keras.callbacks.ModelCheckpoint(filepath=os.path.join(args.model_path, args.model_name), save_best_only=True))
+callbacks.append(FocusCallback())
 
 def preprocess(ds):
     ds = ds.batch(args.batch_size, drop_remainder=True).prefetch(100)
@@ -141,7 +153,7 @@ if args.model_path is not None:
 
 np.set_printoptions(threshold=sys.maxsize)
 
-x_test = [e.numpy() for e in test_dataset]
+x_test = [e.numpy() for e in test_dataset.take(100)]
 x_test = np.array(x_test)
 
 preds = model.predict(x_test)
