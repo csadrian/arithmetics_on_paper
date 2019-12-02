@@ -72,7 +72,6 @@ out = layers.Conv2D(NUM_SYMBOLS, (3,3), padding='same')(out)
 model = tf.keras.Model(inputs=inp, outputs=out)
 
 # Instantiate a logistic loss function that expects integer targets.
-loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True, label_smoothing=0.0)
 
 """
 eps = 1e-8
@@ -86,6 +85,16 @@ def xxmy_loss(y_true, y_pred):
     ans += tf.square(y_true-y_pred) * (y_true == 0) * 0.00000     
     return ans
 """    
+
+cc_loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True, label_smoothing=0.0)
+
+def weighted_loss(y_true, y_pred):
+    weights = tf.ones([50, GRID_SIZE, GRID_SIZE]) * 0.01 + tf.clip_by_value(tf.reduce_sum(y_true, axis=-1), 0.0, 1.0)
+    return cc_loss(y_true, y_pred, weights)
+    #a = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_true, logits=y_pred, axis=-1)
+    #return tf.reduce_sum(a * weights)
+
+
 # Instantiate an accuracy metric.
 accuracy = tf.keras.metrics.CategoricalAccuracy()
 
@@ -93,7 +102,7 @@ accuracy = tf.keras.metrics.CategoricalAccuracy()
 optimizer = tf.keras.optimizers.Adam()
 
 model.compile(optimizer=optimizer,
-              loss=loss,
+              loss=weighted_loss,
               metrics=[accuracy])
 
 # Instantiate some callbacks
@@ -102,7 +111,7 @@ if args.model_path is not None:
     callbacks.append(tf.keras.callbacks.ModelCheckpoint(filepath=args.model_path, save_best_only=True))
 
 def preprocess(ds):
-    ds = ds.batch(50)
+    ds = ds.batch(50, drop_remainder=True).prefetch(100)
     ds = ds.shuffle(10000)
     ds = ds.map(lambda x, y: (tf.one_hot(x, NUM_SYMBOLS, axis=-1), tf.one_hot(y, NUM_SYMBOLS, axis=-1)))
     return ds
@@ -115,6 +124,7 @@ def preprocess_test(ds):
 train_dataset = preprocess(xy_train).repeat()
 val_dataset = preprocess(xy_val).repeat()
 test_dataset = preprocess_test(xy_val)
+
 
 model.fit(train_dataset,
           validation_data=val_dataset,
