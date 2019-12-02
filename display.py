@@ -65,7 +65,8 @@ def plot_last_step(steps):
     _plot_paper(steps[-1], ax)
     fig.show()
 
-def plot_steps(steps, ncols=None, title='Solution steps on paper'):
+def plot_steps(steps, ncols=None, title='Solution steps on paper',
+               savefig=False):
     if ncols is None:
         ncols = 1 if len(steps) <= 2 else 2
     nrows = int(np.ceil(len(steps)/ncols))
@@ -86,6 +87,7 @@ def plot_steps(steps, ncols=None, title='Solution steps on paper'):
         axes[i].set_title(f"{i+1}. step:")
         _plot_paper(step['paper'], axes[i], diff=diff,
                     attention=step['attention'])
-    fig.savefig(title + '.png', bbox_inches='tight')
+    if savefig:
+        fig.savefig(title + '.png', bbox_inches='tight')
     #plt.clf()
     #fig.show()
