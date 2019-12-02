@@ -1,5 +1,3 @@
-import matplotlib
-matplotlib.use('Agg')
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
@@ -13,15 +11,16 @@ from matplotlib.lines import Line2D
 from solvers import *
 from utils import Symbols as S
 
-
-def _plot_paper(array, ax, diff=None, attention=None, transform=True):
-    if transform:
-        array = np.rot90(array, 3)
-        if diff is not None:
-            diff = np.rot90(diff, 3)
-        if attention is not None:
-            attention = np.rot90(attention, 3)
+def _non_empty_subsquare_dim(array):
     nrows, ncols = array.shape
+    for i in range(1, nrows):
+        if (array[i:, :] == 0).all() and (array[:, i:] == 0).all():
+            return i, i
+    return nrows, ncols
+
+def _plot_paper(array, ax, diff=None, attention=None, shape=(15, 15)):
+    ncols, nrows = shape
+
     ax.set_xlim([0, ncols])
     ax.set_ylim([0, nrows])
     xticks = list(range(ncols))
@@ -43,7 +42,7 @@ def _plot_paper(array, ax, diff=None, attention=None, transform=True):
         for j in range(ncols):
             symbol = array[i, j]
             fontdict = {
-                'color': 'blue', 
+                'color': 'blue',
                 'weight': 'bold',
                 'fontsize': 'large',
             }
@@ -54,10 +53,10 @@ def _plot_paper(array, ax, diff=None, attention=None, transform=True):
                                     }
             if diff[i, j]:
                 fontdict['color'] = 'green'
-            ax.text(i+0.5, j+0.5, (S.visual(symbol)),
+            ax.text(j+0.5, ncols-(i+0.5), (S.visual(symbol)),
                     horizontalalignment='center',
                     verticalalignment='center',
-                    fontdict=fontdict 
+                    fontdict=fontdict
                     )
 
 def plot_last_step(steps):
@@ -77,6 +76,8 @@ def plot_steps(steps, ncols=None, title='Solution steps on paper',
     axes = axes.flatten()
     for ax in axes:
         ax.axis('off')
+    step_dims = [_non_empty_subsquare_dim(step.paper) for step in steps]
+    nrows_paper = ncols_paper = np.max(step_dims)
     for i, step in enumerate(steps):
         step = steps[i]
         if i > 0:
@@ -86,7 +87,8 @@ def plot_steps(steps, ncols=None, title='Solution steps on paper',
         axes[i].axis('on')
         axes[i].set_title(f"{i+1}. step:")
         _plot_paper(step['paper'], axes[i], diff=diff,
-                    attention=step['attention'])
+                    attention=step['attention'],
+                    shape=(nrows_paper, ncols_paper))
     if savefig:
         fig.savefig(title + '.png', bbox_inches='tight')
     #plt.clf()
