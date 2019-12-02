@@ -152,14 +152,15 @@ def _add_question_or_entity(context, p, q, is_question):
         'What is {p} + {q}?',
     ])
     return example.Problem(
-        question=example.question(context, template, p=p, q=q),
+        question=example.question(context, template, p=p, q=q, problem_type='add'),
         answer=value)
   else:
     return composition.Entity(
         context=context,
         value=value,
         description='Let {self} = {p} + {q}.',
-        p=p, q=q)
+        p=p, q=q,
+        problem_type='add')
 
 
 def _sub_question_or_entity(context, p, q, is_question):
@@ -184,14 +185,15 @@ def _sub_question_or_entity(context, p, q, is_question):
           templates.append('What is the {} between {}?'.format(adjective, pair))
     template = random.choice(templates)
     return example.Problem(
-        question=example.question(context, template, p=p, q=q),
+        question=example.question(context, template, p=p, q=q, problem_type='sub'),
         answer=value)
   else:
     return composition.Entity(
         context=context,
         value=value,
         description='Let {self} = {p} - {q}.',
-        p=p, q=q)
+        p=p, q=q,
+        problem_type='sub')
 
 
 def _entropy_for_pair(entropy):
