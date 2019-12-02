@@ -17,9 +17,14 @@ parser.add_argument('--dataset_path', dest="dataset_path", default="datasets", t
 parser.add_argument('--split', dest="split", default="test", type=str, help="Split to use at evaluation")
 parser.add_argument('--eval_size', dest="eval_size", default=1000, type=str, help="Number of problems used for evaluation")
 
+# training
+parser.add_argument('--train_iters', dest="train_iters", default=100000, type=int, help="Number of iters to train.")
+parser.add_argument('--batch_size', dest="batch_size", default=50, type=int, help="Batch size.")
+
 # model paths
 parser.add_argument('--prefix', dest="prefix", default="trash", help="File prefix for the output visualizations and models.")
 parser.add_argument('--model_path', dest="model_path", default=None, help="Path to saved networks. If None, build networks from scratch.")
+parser.add_argument('--model_name', dest="model_name", default="model", help="Name of the model for saving.")
 
 args = parser.parse_args()
 

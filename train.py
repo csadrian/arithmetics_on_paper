@@ -89,7 +89,7 @@ def xxmy_loss(y_true, y_pred):
 cc_loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True, label_smoothing=0.0)
 
 def weighted_loss(y_true, y_pred):
-    weights = tf.ones([50, GRID_SIZE, GRID_SIZE]) * 0.01 + tf.clip_by_value(tf.reduce_sum(y_true, axis=-1), 0.0, 1.0)
+    weights = tf.ones([args.batch_size, GRID_SIZE, GRID_SIZE]) * 0.01 + tf.clip_by_value(tf.reduce_sum(y_true, axis=-1), 0.0, 1.0)
     return cc_loss(y_true, y_pred, weights)
     #a = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_true, logits=y_pred, axis=-1)
     #return tf.reduce_sum(a * weights)
@@ -108,10 +108,10 @@ model.compile(optimizer=optimizer,
 # Instantiate some callbacks
 callbacks = []
 if args.model_path is not None:
-    callbacks.append(tf.keras.callbacks.ModelCheckpoint(filepath=args.model_path, save_best_only=True))
+    callbacks.append(tf.keras.callbacks.ModelCheckpoint(filepath=os.path.join(args.model_path, args.model_name), save_best_only=True))
 
 def preprocess(ds):
-    ds = ds.batch(50, drop_remainder=True).prefetch(100)
+    ds = ds.batch(args.batch_size, drop_remainder=True).prefetch(100)
     ds = ds.shuffle(10000)
     ds = ds.map(lambda x, y: (tf.one_hot(x, NUM_SYMBOLS, axis=-1), tf.one_hot(y, NUM_SYMBOLS, axis=-1)))
     return ds
@@ -125,16 +125,19 @@ train_dataset = preprocess(xy_train).repeat()
 val_dataset = preprocess(xy_val).repeat()
 test_dataset = preprocess_test(xy_val)
 
+validation_steps = 100
+steps_per_epoch = 1000
+epochs = args.train_iters // steps_per_epoch
 
 model.fit(train_dataset,
           validation_data=val_dataset,
           validation_steps=100,
-          epochs=25,
-          steps_per_epoch=1000,
+          epochs=epochs,
+          steps_per_epoch=steps_per_epoch,
           callbacks=callbacks)
 
 if args.model_path is not None:
-    model.save(args.model_path)
+    model.save(os.path.join(args.model_path, args.model_name))
 
 np.set_printoptions(threshold=sys.maxsize)
 
