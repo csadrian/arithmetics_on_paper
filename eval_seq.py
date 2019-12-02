@@ -17,7 +17,8 @@ print(args)
 
 dataset = generators.sup_dataset_from_tfrecords([os.path.join(args.dataset_path, args.dataset) + args.split + '.tfrecords'])
 
-model = tf.keras.models.load_model(os.path.join(args.model_path, args.model_name))
+model = tf.keras.models.load_model(os.path.join(args.model_path, args.model_name), custom_objects={'AttentionAugmentation2D': AttentionAugmentation2D})
+#model = tf.keras.models.load_model(os.path.join(args.model_path, args.model_name))
 
 # Check its architecture
 model.summary()

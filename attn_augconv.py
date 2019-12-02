@@ -2,7 +2,7 @@ from tensorflow.keras.layers import Layer
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import concatenate
 
-from keras import initializers
+from tensorflow.keras import initializers
 from keras import backend as K
 
 import tensorflow as tf
@@ -110,17 +110,16 @@ class AttentionAugmentation2D(Layer):
 
         if self.relative:
             dk_per_head = self.depth_k // self.num_heads
-
             if dk_per_head == 0:
                 print('dk per head', dk_per_head)
 
             self.key_relative_w = self.add_weight('key_rel_w',
-                                                  shape=[2 * width - 1, dk_per_head],
+                                                  shape=[2 * width.value - 1, dk_per_head],
                                                   initializer=initializers.RandomNormal(
                                                       stddev=dk_per_head ** -0.5))
 
             self.key_relative_h = self.add_weight('key_rel_h',
-                                                  shape=[2 * height - 1, dk_per_head],
+                                                  shape=[2 * height.value - 1, dk_per_head],
                                                   initializer=initializers.RandomNormal(
                                                       stddev=dk_per_head ** -0.5))
 
@@ -176,7 +175,7 @@ class AttentionAugmentation2D(Layer):
 
     def compute_output_shape(self, input_shape):
         output_shape = list(input_shape)
-        output_shape[self.axis] = self.depth_v
+        output_shape[self.axis] = self.depth_v.value
         return tuple(output_shape)
 
     def split_heads_2d(self, ip):
@@ -295,6 +294,8 @@ def augmented_conv2d(ip, filters, kernel_size=(3, 3), strides=(1, 1),
     channel_axis = 1 if K.image_data_format() == 'channels_first' else -1
 
     depth_k, depth_v = _normalize_depth_vars(depth_k, depth_v, filters)
+    #depth_k = depth_k.value
+    #depth_v = depth_v.value
 
     conv_out = _conv_layer(filters - depth_v, kernel_size, strides)(ip)
     # Augmented Attention Block
