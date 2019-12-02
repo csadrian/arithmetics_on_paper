@@ -47,7 +47,7 @@ def _plot_paper(array, ax, diff=None, attention=None, shape=(15, 15)):
                 'fontsize': 'large',
             }
             if attention[i, j] > 0.5:
-                fontdict['bbox'] = {'facecolor': 'white',
+                fontdict['bbox'] = {
                                     'color': 'red',
                                     'alpha': 0.1
                                     }
@@ -93,3 +93,12 @@ def plot_steps(steps, ncols=None, title='Solution steps on paper',
         fig.savefig(title + '.png', bbox_inches='tight')
     #plt.clf()
     #fig.show()
+
+def _mock_problem_generator(problem):
+    while True:
+        yield problem
+
+def plot_example(solver, problem, grid_size=100):
+    res = next(iter(solver(grid_size).generator(
+        _mock_problem_generator(problem))))
+    plot_steps(res)
