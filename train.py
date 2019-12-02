@@ -153,7 +153,7 @@ if args.model_path is not None:
 
 np.set_printoptions(threshold=sys.maxsize)
 
-x_test = [e.numpy() for e in test_dataset.take(1000)]
+x_test = [e.numpy() for e in test_dataset.take(100)]
 x_test = np.array(x_test)
 
 preds = model.predict(x_test)
