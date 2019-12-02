@@ -50,7 +50,7 @@ class AddOrSubSolver(Solver):
             d = d._decimal
             nb_decimals = abs(d.as_tuple().exponent)
             d_int = int(d.__mul__(10 ** nb_decimals))
-           return d_int, nb_decimals
+            return d_int, nb_decimals
         else:
             return d, 0
 
@@ -68,27 +68,35 @@ class AddOrSubSolver(Solver):
         elif verbosity >= 2:
             step_by_step = True
 
-        a, b = problem.params['p'], problem.params['q']
+        a, b, problem_type = problem.params['p'], problem.params['q'], problem.params['problem_type']
+
+        if problem_type == 'add':
+            problem_sign = 1
+        elif problem_type == 'sub':
+            problem_sign = -1
 
         self.paper.go_to_mark('question')
         self.move_right()
         self.paper.print_number(a._decimal, orientation=1)
-        a, a_sign = self._check_sign(a)
-        b, b_sign = self._check_sign(b)
-        if b_sign == 1:
+        if problem_sign == 1:
             self.paper.print_symbol(S.add, orientation=1, attention=True)
         else:
             self.paper.print_symbol(S.sub, orientation=1, attention=True)
-        self.paper.print_number(b, orientation=1)
+        self.paper.print_number(b._decimal, orientation=1)
 
         a, a_nb_dec = self._decimal_to_int(a)
         b, b_nb_dec = self._decimal_to_int(b)
+
         if a_nb_dec > b_nb_dec:
             nb_dec = a_nb_dec
             b = b * 10**(nb_dec - b_nb_dec)
         else:
             nb_dec = b_nb_dec
             a = a * 10**(nb_dec - a_nb_dec)
+
+        a, a_sign = self._check_sign(a)
+        b, b_sign = self._check_sign(b)
+        b_sign = b_sign * problem_sign
 
         if a_sign < b_sign:
             a_copy = a
