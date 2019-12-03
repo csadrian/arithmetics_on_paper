@@ -243,7 +243,7 @@ class PaperWithNumbers:
         # word: sequence of symbols without empty sign
         self.mark_current_pos('gcn')
         res = []
-        while self.value_at_position() in range(10):
+        while self.value_at_position() in range(1, 11):
             res.append((self._x, self._y))
             self.move_right(orientation)
         self.go_to_mark('gcn')
@@ -255,11 +255,14 @@ class PaperWithNumbers:
         # at the last digit of the number
         self.set_attention(self._word_at_position(orientation))
 
-    def get_word_at_position(self, orientation=-1):
+    def _get_word_at_position(self, orientation=-1):
         res = []
         for cell in self._word_at_position(orientation):
             res.append(self._value_at_position(*cell))
-        return ''.join(map(str, res))
+        return ''.join((str(digit-1) for digit in res))
 
     def get_number_at_position(self, orientation=-1):
-        return int(self.get_word_at_position(orientation))
+        word = self._get_word_at_position(orientation)
+        if word == '':
+            return 0
+        return int(self._get_word_at_position(orientation))
