@@ -1,6 +1,6 @@
 import numpy as np
 from sympy import *
-from problem import *
+from .problem import *
 
 class TwoPolynomialProblem(Problem):
 
