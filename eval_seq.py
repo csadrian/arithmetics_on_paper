@@ -44,9 +44,29 @@ def is_finished(state):
 
 np.set_printoptions(threshold=sys.maxsize)
 
+points = 0
+total_points = 0
+
+for xy in preprocess(dataset).take(args.eval_size):
+
+  x = xy[0][:]
+  y = xy[1][:]
+  pred_y = model.predict(x)
+  pred_ys = np.argmax(pred_y, axis=-1)
+  ys = np.argmax(y, axis=-1)
+  print(pred_ys.shape)
+  print(ys.shape)
+
+  points += np.sum(np.all(pred_ys == ys, axis=(1,2)))
+  total_points += args.batch_size
+  print("points: ", points, ", total: ", total_points, ", precent: ", points/total_points)
+
+quit()
+
+
 for x in preprocess(dataset).take(args.eval_size):
 
-  state = x[0][1]
+  state = x[0][0]
   state = np.expand_dims(state, axis=0)
   state_s = np.argmax(state, axis=-1)
   print("state_s.shape:", state_s.shape)
