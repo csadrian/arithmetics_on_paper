@@ -25,7 +25,7 @@ def _plot_paper(array, ax, diff=None, attention=None, shape=(15, 15)):
     ax.set_ylim([0, nrows])
     xticks = list(range(ncols))
     yticks = list(range(nrows))
-    xticklabels = [2*' ' + l + ' ' for l in map(str, reversed(xticks))]
+    xticklabels = [2*' ' + l + ' ' for l in map(str, xticks)]
     yticklabels = [l for l in map(str, reversed(yticks))]
     ax.set_xticks(xticks)
     ax.set_xticklabels(xticklabels, ha='left')
