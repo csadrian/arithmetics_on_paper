@@ -25,28 +25,31 @@ import inspect
 
 from mathematics_dataset.util import composition
 
-from problems.arithmetic_problems import MultiplicationProblem
-from solvers.arithmetic_solvers import MultiplySolver
+from problems.arithmetic_problems import MultiplicationProblem, AddOrSubProblem
+from solvers.arithmetic_solvers import MultiplySolver, AddOrSubSolver
 import display
 
 module_to_problem = {
-  'mul': MultiplicationProblem
+  #'mul': MultiplicationProblem,
+  'add_or_sub': AddOrSubProblem
 }
 
 
 problem_to_solver = {
-    'MultiplicationProblem' : MultiplySolver
+    #'MultiplicationProblem' : MultiplySolver,
+    'AddOrSubProblem': AddOrSubSolver
 }
 
 solutions = collections.defaultdict(list)
 
 def generate_solution(problem, question, name):
-  solver = problem_to_solver['MultiplicationProblem'](22)
+  #solver = problem_to_solver['MultiplicationProblem'](40)
+  solver = problem_to_solver['AddOrSubProblem'](22)
   solver.play(problem, verbosity=2)
   steps = solver.get_steps()
   solutions[name].append(steps)
 
-  # display.plot_steps(steps, title=question)
+  #display.plot_steps(steps, title=question, savefig=True)
 
 def question(context, template, **kwargs):
   """Makes a question, using the given context and template.

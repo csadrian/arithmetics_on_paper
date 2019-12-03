@@ -2,7 +2,7 @@ from tensorflow.keras.layers import Layer
 from tensorflow.keras.layers import Conv2D
 from tensorflow.keras.layers import concatenate
 
-from keras import initializers
+from tensorflow.keras import initializers
 from keras import backend as K
 
 import tensorflow as tf
@@ -96,6 +96,7 @@ class AttentionAugmentation2D(Layer):
 
         self.axis = 1 if K.image_data_format() == 'channels_first' else -1
 
+
     def build(self, input_shape):
         self._shape = input_shape
 
@@ -110,17 +111,16 @@ class AttentionAugmentation2D(Layer):
 
         if self.relative:
             dk_per_head = self.depth_k // self.num_heads
-
             if dk_per_head == 0:
                 print('dk per head', dk_per_head)
 
             self.key_relative_w = self.add_weight('key_rel_w',
-                                                  shape=[2 * width - 1, dk_per_head],
+                                                  shape=[2 * width.value - 1, dk_per_head],
                                                   initializer=initializers.RandomNormal(
                                                       stddev=dk_per_head ** -0.5))
 
             self.key_relative_h = self.add_weight('key_rel_h',
-                                                  shape=[2 * height - 1, dk_per_head],
+                                                  shape=[2 * height.value - 1, dk_per_head],
                                                   initializer=initializers.RandomNormal(
                                                       stddev=dk_per_head ** -0.5))
 
@@ -138,7 +138,6 @@ class AttentionAugmentation2D(Layer):
         q = self.split_heads_2d(q)
         k = self.split_heads_2d(k)
         v = self.split_heads_2d(v)
-
         # scale query
         depth_k_heads = self.depth_k / self.num_heads
         q *= (depth_k_heads ** -0.5)
@@ -172,12 +171,16 @@ class AttentionAugmentation2D(Layer):
             # return to [batch, depth_v, height, width] for channels first
             attn_out = K.permute_dimensions(attn_out, [0, 3, 1, 2])
 
+        attn_out.set_shape([None, self._shape[1], self._shape[2], self.depth_v])
+
         return attn_out
 
     def compute_output_shape(self, input_shape):
         output_shape = list(input_shape)
-        output_shape[self.axis] = self.depth_v
-        return tuple(output_shape)
+        output_shape[self.axis] = self.depth_v.value
+        print(output_shape)
+        return tf.TensorShape(output_shape)
+
 
     def split_heads_2d(self, ip):
         tensor_shape = K.shape(ip)
@@ -300,7 +303,7 @@ def augmented_conv2d(ip, filters, kernel_size=(3, 3), strides=(1, 1),
     # Augmented Attention Block
     qkv_conv = _conv_layer(2 * depth_k + depth_v, (1, 1), strides)(ip)
     attn_out = AttentionAugmentation2D(depth_k, depth_v, num_heads, relative_encodings)(qkv_conv)
-    attn_out.set_shape([None, 22, 22, depth_v])
+
     attn_out = _conv_layer(depth_v, kernel_size=(1, 1))(attn_out)
 
     output = concatenate([conv_out, attn_out], axis=channel_axis)

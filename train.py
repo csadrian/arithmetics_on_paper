@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('Agg')
+
 import numpy as np
 import random
 import tensorflow as tf
@@ -22,7 +25,6 @@ print(args)
 
 tf.compat.v1.enable_eager_execution()
 
-NUM_SYMBOLS = 33
 GRID_SIZE = 22
 
 dataset_prefix = os.path.join(args.dataset_path, args.dataset)
@@ -33,23 +35,29 @@ xy_test  =  generators.sup_dataset_from_tfrecords([dataset_prefix+'.extrapolate.
 
 
 # Instantiate a simple classification model
-inp = tf.keras.layers.Input(shape=(GRID_SIZE, GRID_SIZE, NUM_SYMBOLS))
+inp = tf.keras.layers.Input(shape=(GRID_SIZE, GRID_SIZE, Symbols.NUM_SYMBOLS))
 
 out = layers.Conv2D(64, (3,3), padding='same', activation=tf.nn.relu)(inp)
-
 
 out = augmented_conv2d(out, filters=200, kernel_size=(3, 3),
                          depth_k=0.2, depth_v=0.2,  # dk/v (0.2) * f_out (20) = 4
                          num_heads=4, relative_encodings=True)
 out = layers.Activation('relu')(out)
 
-out = layers.Conv2D(64, (3,3), padding='same', activation=tf.nn.relu)(out)
+out = layers.Conv2D(68, (3,3), padding='same', activation=tf.nn.relu)(out)
 out = layers.BatchNormalization()(out)
 
 out = augmented_conv2d(out, filters=200, kernel_size=(3, 3),
                          depth_k=0.2, depth_v=0.2,  # dk/v (0.2) * f_out (20) = 4
                          num_heads=4, relative_encodings=True)
 out = layers.Activation('relu')(out)
+
+
+out = augmented_conv2d(out, filters=200, kernel_size=(3, 3),
+                         depth_k=0.2, depth_v=0.2,  # dk/v (0.2) * f_out (20) = 4
+                         num_heads=4, relative_encodings=True)
+out = layers.Activation('relu')(out)
+
 #out = layers.BatchNormalization()(out)
 
 #out = layers.Conv2D(256, (5,5), padding='same', activation=tf.nn.relu)(out)
@@ -60,12 +68,11 @@ out = layers.Activation('relu')(out)
 #out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 #out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
 #out = layers.Conv2D(256, (3,3), padding='same', activation=tf.nn.relu)(out)
-out = layers.Conv2D(NUM_SYMBOLS, (3,3), padding='same')(out)
+out = layers.Conv2D(Symbols.NUM_SYMBOLS, (3,3), padding='same')(out)
 
 model = tf.keras.Model(inputs=inp, outputs=out)
 
 # Instantiate a logistic loss function that expects integer targets.
-loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True, label_smoothing=0.0)
 
 """
 eps = 1e-8
@@ -79,6 +86,17 @@ def xxmy_loss(y_true, y_pred):
     ans += tf.square(y_true-y_pred) * (y_true == 0) * 0.00000     
     return ans
 """    
+
+bg_weight = tf.Variable(0.0)
+cc_loss = tf.keras.losses.CategoricalCrossentropy(from_logits=True, label_smoothing=0.0)
+
+def weighted_loss(y_true, y_pred):
+    weights = tf.ones([args.batch_size, GRID_SIZE, GRID_SIZE]) * bg_weight + tf.clip_by_value(tf.reduce_sum(y_true, axis=-1), 0.0, 1.0)
+    return cc_loss(y_true, y_pred, weights)
+    #a = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_true, logits=y_pred, axis=-1)
+    #return tf.reduce_sum(a * weights)
+
+
 # Instantiate an accuracy metric.
 accuracy = tf.keras.metrics.CategoricalAccuracy()
 
@@ -86,42 +104,54 @@ accuracy = tf.keras.metrics.CategoricalAccuracy()
 optimizer = tf.keras.optimizers.Adam()
 
 model.compile(optimizer=optimizer,
-              loss=loss,
+              loss=weighted_loss,
               metrics=[accuracy])
+
+
+class FocusCallback(tf.keras.callbacks.Callback):
+  def on_epoch_begin(self, epoch, logs=None):
+    if epoch > 1:
+       bg_weight.assign(0.01)
+       print("bg weight: {}".format(bg_weight.read_value()))
 
 # Instantiate some callbacks
 callbacks = []
 if args.model_path is not None:
-    callbacks.append(tf.keras.callbacks.ModelCheckpoint(filepath=args.model_path, save_best_only=True))
+    callbacks.append(tf.keras.callbacks.ModelCheckpoint(filepath=os.path.join(args.model_path, args.model_name), save_best_only=True))
+callbacks.append(FocusCallback())
 
 def preprocess(ds):
-    ds = ds.batch(50)
+    ds = ds.batch(args.batch_size, drop_remainder=True).prefetch(100)
     ds = ds.shuffle(10000)
-    ds = ds.map(lambda x, y: (tf.one_hot(x, NUM_SYMBOLS, axis=-1), tf.one_hot(y, NUM_SYMBOLS, axis=-1)))
+    ds = ds.map(lambda x, y: (tf.one_hot(x, Symbols.NUM_SYMBOLS, axis=-1), tf.one_hot(y, Symbols.NUM_SYMBOLS, axis=-1)))
     return ds
 
 def preprocess_test(ds):
     ds = ds.shuffle(10000)
-    ds = ds.map(lambda x, y: tf.one_hot(x, NUM_SYMBOLS, axis=-1))
+    ds = ds.map(lambda x, y: tf.one_hot(x, Symbols.NUM_SYMBOLS, axis=-1))
     return ds
 
 train_dataset = preprocess(xy_train).repeat()
 val_dataset = preprocess(xy_val).repeat()
 test_dataset = preprocess_test(xy_val)
 
+validation_steps = 100
+steps_per_epoch = 1000
+epochs = args.train_iters // steps_per_epoch
+
 model.fit(train_dataset,
           validation_data=val_dataset,
           validation_steps=100,
-          epochs=25,
-          steps_per_epoch=1000,
+          epochs=epochs,
+          steps_per_epoch=steps_per_epoch,
           callbacks=callbacks)
 
 if args.model_path is not None:
-    model.save(args.model_path)
+    model.save(os.path.join(args.model_path, args.model_name))
 
 np.set_printoptions(threshold=sys.maxsize)
 
-x_test = [e.numpy() for e in test_dataset]
+x_test = [e.numpy() for e in test_dataset.take(100)]
 x_test = np.array(x_test)
 
 preds = model.predict(x_test)

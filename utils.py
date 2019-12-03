@@ -25,6 +25,8 @@ def primes_lt(n):
     return res
 
 class Symbols:
+    NUM_SYMBOLS=33
+
     add = 11
     sub = 12
     is_prime = 13
@@ -48,6 +50,7 @@ class Symbols:
     comma = 31
     fraction = 32
     percentage = 33
+    gcd = 34
 
     @classmethod
     def visual(cls, n):
@@ -73,7 +76,8 @@ class Symbols:
             cls.end: '∎',
             cls.comma: ',',
             cls.fraction: '/',
-            cls.percentage: '%'
+            cls.percentage: '%',
+            cls.gcd: 'gcd',
         }
         for i in range(1, 11):
             symbols[i] = str(i-1)
