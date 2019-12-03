@@ -65,7 +65,7 @@ def plot_last_step(steps):
     fig.show()
 
 def plot_steps(steps, ncols=None, title='Solution steps on paper',
-               savefig=False):
+               savefig=False, dynamic_dims=True):
     if ncols is None:
         ncols = 1 if len(steps) <= 2 else 2
     nrows = int(np.ceil(len(steps)/ncols))
@@ -76,8 +76,11 @@ def plot_steps(steps, ncols=None, title='Solution steps on paper',
     axes = axes.flatten()
     for ax in axes:
         ax.axis('off')
-    step_dims = [_non_empty_subsquare_dim(step.paper) for step in steps]
-    nrows_paper = ncols_paper = np.max(step_dims)
+    if dynamic_dims:
+        step_dims = [_non_empty_subsquare_dim(step.paper) for step in steps]
+        nrows_paper = ncols_paper = np.max(step_dims)
+    else:
+        nrows_paper, ncols_paper = steps[0].paper.shape
     for i, step in enumerate(steps):
         step = steps[i]
         if i > 0:
