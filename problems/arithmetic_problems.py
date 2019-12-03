@@ -3,7 +3,13 @@ from .problem import *
 
 
 class AdditionProblem(BinaryOperationProblem):
-    pass
+    
+    def __init__(self, params, base_lim=[10, 10]):
+        super().__init__(params)
+        self.base_lim = base_lim
+
+    def generate_one(self):
+        return super().generate_one.update({'base' : np.random.randint(self.base_lim[0], self.base_lim[1])})
 
 
 class MultiplicationProblem(BinaryOperationProblem):

@@ -176,7 +176,7 @@ class PaperWithNumbers:
 
     @print_func
     @reset_arg
-    def print_number(self, n, step_by_step=False, attention=False, 
+    def print_number(self, n, b=10, step_by_step=False, attention=False, 
                       orientation=-1, mark_pos=False, solver=None):
         x, y = self._x, self._y
         if n < 0:
@@ -200,7 +200,7 @@ class PaperWithNumbers:
                 self.print_symbol(int(letter) + 1, step_by_step, attention, orientation, mark_pos)
             return
 
-        n_in_base = number_to_base(n)
+        n_in_base = number_to_base(n, b)
         if orientation > 0:
             n_in_base.reverse()
         for i in range(len(n_in_base)):

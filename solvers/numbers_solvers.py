@@ -268,9 +268,7 @@ class PlaceValueSolver(Solver):
         place = problem['place']
 
         self.paper.print_number(number, orientation=1, reset=True)
-
         self.print_symbol(S.last_digit)
-
         self.paper.print_number(place, orientation=1)
 
         for i in range(1, place + 1):
@@ -283,9 +281,7 @@ class PlaceValueSolver(Solver):
                 self.paper.print_symbol(0)
 
             self.paper.print_number(int(str(number)[i:]), orientation=1)
-
             self.paper.print_symbol(S.last_digit)
-            
             self.paper.print_number(i, orientation=1)
 
 

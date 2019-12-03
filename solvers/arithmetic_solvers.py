@@ -10,37 +10,40 @@ class AddSolver(Solver):
     def play(self, problem):
         a = problem['a']
         b = problem['b']
-
+        base = problem['base']
+        
         c = a + b
 
-        self.paper.print_number(a, orientation=-1, preserve_pos=True)
+        self.paper.print_number(a, base, orientation=-1, preserve_pos=True)
         self.move_down()
-        self.paper.print_number(b, orientation=-1)
+        self.paper.print_number(b, base, orientation=-1)
         self.paper.print_symbol(S.add, attention=True)
         self.paper.make_step()
         self.go_to_mark('start')
         self.move_down(2)
-        self.paper.print_number(c, attention=True, orientation=-1, reset=True)
+        self.paper.print_number(c, base, attention=True, orientation=-1, reset=True)
         self.paper.make_step()
 
 
 class SubtractSolver(Solver):
 
     def play(self, problem):
-        a, b = problem['a'], problem['b']
+        a = problem['a']
+        b = problem['b']
+        base = problem['base']
 
         c = a - b
 
-        self.paper.print_number(a, orientation=-1, attention=True)
+        self.paper.print_number(a, base, orientation=-1, attention=True)
         self.go_to_mark('start')
         self.move_down()
-        self.paper.print_number(b, orientation=-1, attention=True)
+        self.paper.print_number(b, base, orientation=-1, attention=True)
         self.paper.print_symbol(S.sub, orientation=0, attention=True)
 
         self.paper.make_step()
         self.go_to_mark('start')
         self.move_down(2)
-        self.paper.print_number(c, attention=True, reset=True)
+        self.paper.print_number(c, base, attention=True, reset=True)
         self.paper.make_step()
 
 
@@ -198,7 +201,6 @@ class AddSubMultipleSolver(Solver):
             self.paper.go_to_mark('margin')
             
             self.paper.print_number(coefs[i+1])
-            
             self.print_symbol(ops[i])
 
             if ops[i] is 11:
