@@ -44,6 +44,106 @@ class SubtractSolver(Solver):
         self.paper.make_step()
 
 
+class AddOrSubSolver(Solver):
+    def _decimal_to_int(self, d):
+        if isinstance(d, _Decimal):
+            d = d._decimal
+            nb_decimals = abs(d.as_tuple().exponent)
+            d_int = int(d.__mul__(10 ** nb_decimals))
+            return d_int, nb_decimals
+        else:
+            return d, 0
+
+    def _check_sign(self, n):
+        if n < 0:
+            sign = -1
+            n = n.__neg__()
+        else:
+            sign = 1
+        return n, sign
+
+    def play(self, problem, verbosity=2):
+        if verbosity == 1:
+            step_by_step = False
+        elif verbosity >= 2:
+            step_by_step = True
+
+        a, b, problem_type = problem.params['p'], problem.params['q'], problem.params['problem_type']
+
+        if problem_type == 'add':
+            problem_sign = 1
+        elif problem_type == 'sub':
+            problem_sign = -1
+
+        self.paper.go_to_mark('question')
+        self.move_right()
+        self.paper.print_number(a._decimal, orientation=1)
+        if problem_sign == 1:
+            self.paper.print_symbol(S.add, orientation=1, attention=True)
+        else:
+            self.paper.print_symbol(S.sub, orientation=1, attention=True)
+        self.paper.print_number(b._decimal, orientation=1)
+
+        a, a_nb_dec = self._decimal_to_int(a)
+        b, b_nb_dec = self._decimal_to_int(b)
+
+        if a_nb_dec > b_nb_dec:
+            nb_dec = a_nb_dec
+            b = b * 10**(nb_dec - b_nb_dec)
+        else:
+            nb_dec = b_nb_dec
+            a = a * 10**(nb_dec - a_nb_dec)
+
+        a, a_sign = self._check_sign(a)
+        b, b_sign = self._check_sign(b)
+        b_sign = b_sign * problem_sign
+
+        if a_sign < b_sign:
+            a_copy = a
+            a = b
+            b = a_copy
+            a_sign = 1
+            b_sign = -1
+
+        self.go_to_mark('start')
+        self.paper.print_number(a, orientation=-1, step_by_step=step_by_step)
+        self.go_to_mark('start')
+        self.move_down()
+        self.paper.print_number(b, orientation=-1, step_by_step=step_by_step)
+
+        if a_sign == b_sign:
+            self.paper.print_symbol(S.add, orientation=-1, step_by_step=step_by_step)
+            c = a + b
+            c_sign = a_sign
+        else:
+            self.paper.print_symbol(S.sub, orientation=-1, step_by_step=step_by_step)
+            c = a - b
+            c, c_sign = self._check_sign(c)
+
+        self.go_to_mark('start')
+        self.move_down(2)
+        self.paper.print_number(c, orientation=-1, step_by_step=step_by_step)
+        if c_sign == -1:
+                self.paper.print_symbol(S.sub, orientation=-1, step_by_step=step_by_step)
+
+        if nb_dec > 0:
+            result = Decimal(str(c / 10 **(nb_dec)))
+            self.paper.go_to_mark('start')
+            self.move_down(4)
+            self.print_number(result, orientation=-1, step_by_step=step_by_step)
+            if c_sign == -1:
+                self.paper.print_symbol(S.sub, orientation=-1, step_by_step=step_by_step)
+        else:
+            result = c
+
+        self.go_to_mark('answer')
+        if c_sign == -1:
+            self.paper.print_symbol(S.sub, orientation=1, step_by_step=step_by_step)
+        self.paper.print_number(result, orientation=1, step_by_step=step_by_step)
+        self.paper.print_symbol(S.end)
+        self.paper.make_step()
+
+
 class MultiplySolver(Solver):
     def _decimal_to_int(self, d):
         if isinstance(d, _Decimal):

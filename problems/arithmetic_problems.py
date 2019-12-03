@@ -19,6 +19,9 @@ class AddSubMultipleProblem(Problem):
         return {'coefs' : [np.random.randint(self.lim[i][0], self.lim[i][1]) for i in range(len(self.lim))],
                 'ops' : [np.random.randint(11, 12) for i in range(len(self.lim) - 1)]}
 
+class AddOrSubProblem(BinaryOperationProblem):
+    pass
+
 
 class EasyAdditionProblem(AdditionProblem):
     order = 10

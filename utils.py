@@ -25,6 +25,8 @@ def primes_lt(n):
     return res
 
 class Symbols:
+    NUM_SYMBOLS=33
+
     add = 11
     sub = 12
     is_prime = 13
