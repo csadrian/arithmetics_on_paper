@@ -51,6 +51,7 @@ class Symbols:
     fraction = 32
     percentage = 33
     gcd = 34
+    lcm = 35
 
     @classmethod
     def visual(cls, n):
@@ -78,6 +79,7 @@ class Symbols:
             cls.fraction: '/',
             cls.percentage: '%',
             cls.gcd: 'gcd',
+            cls.lcm: 'lcm',
         }
         for i in range(1, 11):
             symbols[i] = str(i-1)

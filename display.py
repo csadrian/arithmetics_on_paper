@@ -101,7 +101,7 @@ def _mock_problem_generator(problem):
     while True:
         yield problem
 
-def plot_example(solver, problem, grid_size=100):
+def plot_example(solver, problem, grid_size=100, ncols=None):
     res = next(iter(solver(grid_size).generator(
         _mock_problem_generator(problem))))
-    plot_steps(res)
+    plot_steps(res, ncols=ncols)

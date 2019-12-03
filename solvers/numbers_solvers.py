@@ -301,54 +301,66 @@ def factorize(num):
                 break
     return factors
 
-class GCDSolver(Solver):
+class DoubleFactorBaseClass(Solver):
 
     def _print_factors(self, mark, number):
         self.go_to_mark_range(mark, end=True)
         self.move_down()
         self.paper.print_symbol(S.factorize, orientation=0)
         self.paper.move_down()
-        # TODO: call for other solver!
         factors_a = factorize(number)
         for factor in factors_a:
             self.paper.print_number(factor, orientation=-1, preserve_pos=True)
             self.paper.move_down()
+        self.make_step(solver='FactorizeSolver')
 
-    def print_solution(self):
-        self.paper.go_to_mark('answer')
-        self.print_number(np.product(self.c_factors), orientation=1)
-        self.paper.print_symbol(S.end)
-
-    def _move_mark_down(self, mark):
-        self.paper.go_to_mark(mark)
-        self.paper.move_down()
-        self.paper.mark_current_pos(mark)
-
-    def add_factor_to_c(self, factor, first_factor=True):
-        self.paper.go_to_mark('c_current')
-        if first_factor:
-            self.c_factors = [factor]
-        if not first_factor:
-            self.paper.print_symbol(S.product, orientation=1)
-            self.c_factors.append(factor)
-        self.paper.print_number(factor, orientation=1)
-        self.paper.mark_current_pos('c_current')
-
-    def play(self, problem):
-        a,b = problem['a'], problem['b']
+    def draw_factors_ab(self, a, b, symbol='gcd'):
         self.paper.move_down(2)
 
-        self.paper.print_symbol(S.gcd, orientation=-1, mark_pos='gcd')
+        self.paper.print_symbol(getattr(S, symbol), orientation=-1, mark_pos=symbol)
         self.paper.mark_current_pos('a_current', vertical_offset=2)
         self.paper.print_number(a, orientation=-1, mark_pos='a')
-        self.paper.go_to_mark('gcd')
+        self.paper.go_to_mark(symbol)
         self.move_right()
         self.paper.print_number(b, orientation=1, mark_pos='b')
         self.paper.mark_current_pos('b_current', vertical_offset=2,
                                     horizontal_offset=-1)
 
+        self.make_step()
         self._print_factors('a', a)
         self._print_factors('b', b)
+
+    def _move_mark_down(self, mark):
+        self.paper.go_to_mark(mark)
+        self.paper.delete_word_at_point()
+        self.paper.move_down()
+        self.paper.mark_current_pos(mark)
+
+    def add_factor_to_c(self, factor):
+        self.paper.go_to_mark('c_current')
+        if self.first_factor_c:
+            self.c_factors = [factor]
+        else:
+            self.paper.print_symbol(S.product, orientation=1)
+            self.c_factors.append(factor)
+        self.paper.print_number(factor, orientation=1)
+        self.paper.mark_current_pos('c_current')
+        self.first_factor_c = False
+
+    def print_solution(self):
+        c = np.product(self.c_factors)
+        self.paper.go_to_mark('c_current')
+        self.paper.print_symbol(S.eq)
+        self.paper.print_number(c, orientation=1)
+        self.paper.go_to_mark('answer')
+        self.print_number(c, orientation=1)
+        self.paper.print_symbol(S.end)
+
+class GCDSolver(DoubleFactorBaseClass):
+
+    def play(self, problem):
+        a,b = problem['a'], problem['b']
+        self.draw_factors_ab(a, b)
 
         self.paper.go_to_mark('start')
         self.print_symbol(S.gcd)
@@ -360,25 +372,73 @@ class GCDSolver(Solver):
         self.paper.go_to_mark('b_current')
         current_factor_b = self.paper.get_number_at_position()
 
-        first_factor_c = True
+        self.first_factor_c = True
 
+        self.make_step()
         while current_factor_a != 0:
             while current_factor_a != current_factor_b:
+                if 0 in (current_factor_a, current_factor_b):
+                    current_factor_a = 1
+                    break
                 if current_factor_a < current_factor_b:
                     self._move_mark_down('a_current')
                     current_factor_a = self.paper.get_number_at_position()
                 if current_factor_a > current_factor_b:
                     self._move_mark_down('b_current')
                     current_factor_b = self.paper.get_number_at_position()
-            self.add_factor_to_c(current_factor_a,
-                                 first_factor=first_factor_c)
-            first_factor_c = False
+                self.make_step()
+            self.add_factor_to_c(current_factor_a)
             self._move_mark_down('a_current')
             current_factor_a = self.paper.get_number_at_position()
             self._move_mark_down('b_current')
             current_factor_b = self.paper.get_number_at_position()
             self.make_step()
 
+        self.print_solution()
+        self.paper.set_attention_current_pos()
+        self.paper.make_step()
+
+class LCMSolver(DoubleFactorBaseClass):
+    
+    def play(self, problem):
+        a,b = problem['a'], problem['b']
+        self.draw_factors_ab(a, b, 'lcm')
+
+        self.paper.go_to_mark('start')
+        self.print_symbol(S.lcm)
+        self.print_symbol(S.eq)
+        self.paper.mark_current_pos('c_current')
+
+        self.make_step()
+
+        self.paper.go_to_mark('a_current')
+        current_factor_a = self.paper.get_number_at_position()
+        self.paper.go_to_mark('b_current')
+        current_factor_b = self.paper.get_number_at_position()
+
+        self.first_factor_c = True
+        while current_factor_a + current_factor_b != 0:
+            if (current_factor_a < current_factor_b
+                    and current_factor_a != 0) or current_factor_b == 0:
+                self.add_factor_to_c(current_factor_a)
+                self._move_mark_down('a_current')
+                current_factor = current_factor_a =\
+                    self.paper.get_number_at_position()
+            elif (current_factor_b < current_factor_a
+                    and current_factor_b != 0) or current_factor_a == 0:
+                self.add_factor_to_c(current_factor_b)
+                self._move_mark_down('b_current')
+                current_factor_b = self.paper.get_number_at_position()
+            elif current_factor_a == current_factor_b and current_factor_a != 0:
+                current_factor = current_factor_a
+                self.add_factor_to_c(current_factor_a)
+                self._move_mark_down('a_current')
+                current_factor_a = self.paper.get_number_at_position()
+                self._move_mark_down('b_current')
+                current_factor_b = self.paper.get_number_at_position()
+            else:
+                raise RuntimeError
+            self.make_step()
         self.print_solution()
         self.paper.set_attention_current_pos()
         self.paper.make_step()

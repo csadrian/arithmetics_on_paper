@@ -135,7 +135,7 @@ class PaperWithNumbers:
     @reset_arg
     def print_symbols_ltr(self, ns, attention=False,
                           orientation=1, mark_pos=False,
-                          step_by_step=False):
+                          step_by_step=False, check_emptiness=True):
         """
         mark_pos : bool or str
             False/0 if no marking needed, name of the mark otherwise
@@ -145,7 +145,8 @@ class PaperWithNumbers:
         if orientation < 0:
             ns.reverse()
         for i, symbol in enumerate(ns):
-            self._check_cell_emptiness((x, y))
+            if check_emptiness:
+                self._check_cell_emptiness((x, y))
             self.paper[x, y] = symbol
             if attention:
                 self.attention[x, y] = 1
@@ -162,9 +163,10 @@ class PaperWithNumbers:
     @print_func
     @reset_arg
     def print_symbol(self, n, step_by_step=False, attention=False,
-                     orientation=1, mark_pos=False):
+                     orientation=1, mark_pos=False, check_emptiness=True):
         x, y = self._x, self._y
-        self._check_cell_emptiness((x, y))
+        # if check_emptiness:
+        #     self._check_cell_emptiness((x, y))
         self.paper[x, y] = n
         if attention:
             self.attention[x, y] = 1
@@ -177,7 +179,8 @@ class PaperWithNumbers:
     @print_func
     @reset_arg
     def print_number(self, n, b=10, step_by_step=False, attention=False, 
-                      orientation=-1, mark_pos=False, solver=None):
+                      orientation=-1, mark_pos=False, solver=None, 
+                     check_emptiness=True):
         x, y = self._x, self._y
         if n < 0:
             self.print_symbol(S.sub, orientation=1, step_by_step=step_by_step)
@@ -205,7 +208,8 @@ class PaperWithNumbers:
             n_in_base.reverse()
         for i in range(len(n_in_base)):
             offset = i * orientation
-            self._check_cell_emptiness((x, y + offset))
+            if check_emptiness:
+                self._check_cell_emptiness((x, y + offset))
             self.paper[x, y + offset] = n_in_base[-(i+1)] + 1
             if attention:
                 self.attention[x, y + offset] = 1
@@ -261,8 +265,19 @@ class PaperWithNumbers:
             res.append(self._value_at_position(*cell))
         return ''.join((str(digit-1) for digit in res))
 
-    def get_number_at_position(self, orientation=-1):
+    def delete_symbol_at_point(self):
+        self.print_symbol(0, check_emptiness=False, orientation=0)
+
+    def delete_word_at_point(self, orientation=-1):
+        self.mark_current_pos('tmp')
+        while self.value_at_position() != 0:
+            self.delete_symbol_at_point()
+            self.move_right(orientation)
+        self.go_to_mark('tmp')
+
+
+    def get_number_at_position(self, orientation=-1, accept_empty=True):
         word = self._get_word_at_position(orientation)
-        if word == '':
+        if word == '' and accept_empty:
             return 0
         return int(self._get_word_at_position(orientation))
