@@ -1,3 +1,6 @@
+import matplotlib
+matplotlib.use('Agg')
+
 import numpy as np
 import random
 import tensorflow as tf
@@ -12,6 +15,8 @@ from utils import Symbols
 import params
 import generators
 #from tensorflow.keras.utils.generic_utils import get_custom_objects
+import paper
+import display
 
 args = params.getArgs()
 print(args)
@@ -46,17 +51,31 @@ np.set_printoptions(threshold=sys.maxsize)
 
 points = 0
 total_points = 0
-
+i = 0
 for xy in preprocess(dataset).take(args.eval_size):
-
+  i+=1
   x = xy[0][:]
   y = xy[1][:]
   pred_y = model.predict(x)
   pred_ys = np.argmax(pred_y, axis=-1)
   ys = np.argmax(y, axis=-1)
+  xs = np.argmax(x, axis=-1)
+
   print(pred_ys.shape)
   print(ys.shape)
 
+  bad = np.where(False == np.all(pred_ys == ys, axis=(1,2)))
+  print(bad)
+  badi = bad[0][0]
+  print("xs", xs[badi].shape)
+  print("ys", ys[badi].shape)
+  print("pys", pred_ys[badi].shape)
+  
+  step1 = paper.Step(paper=xs[badi], attention=None)
+  step2 = paper.Step(paper=pred_ys[badi], attention=None)
+  step3 = paper.Step(paper=ys[badi], attention=None)
+  display.plot_steps([step1, step2, step3], title="bad"+str(i), savefig=True)
+  
   points += np.sum(np.all(pred_ys == ys, axis=(1,2)))
   total_points += args.batch_size
   print("points: ", points, ", total: ", total_points, ", precent: ", points/total_points)
