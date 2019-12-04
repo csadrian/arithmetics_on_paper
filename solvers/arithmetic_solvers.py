@@ -87,6 +87,23 @@ class AddOrSubSolver(Solver):
             self.paper.print_symbol(S.sub, orientation=1, attention=True)
         self.paper.print_number(b._decimal, orientation=1)
 
+        a, a_sign = self._check_sign(a)
+        b, b_sign = self._check_sign(b)
+        b_sign = b_sign * problem_sign
+        c_sign = 1
+
+        if (a_sign < b_sign and b > a):
+            a_copy = a
+            a = b
+            b = a_copy
+        elif (a_sign > b_sign and a < b):
+            a_copy = a
+            a = b
+            b = a_copy
+            c_sign = -1
+        elif (a_sign < b_sign and a > b):
+            c_sign = -1
+
         a, a_nb_dec = self._decimal_to_int(a)
         b, b_nb_dec = self._decimal_to_int(b)
 
@@ -96,17 +113,6 @@ class AddOrSubSolver(Solver):
         else:
             nb_dec = b_nb_dec
             a = a * 10**(nb_dec - a_nb_dec)
-
-        a, a_sign = self._check_sign(a)
-        b, b_sign = self._check_sign(b)
-        b_sign = b_sign * problem_sign
-
-        if a_sign < b_sign:
-            a_copy = a
-            a = b
-            b = a_copy
-            a_sign = 1
-            b_sign = -1
 
         self.go_to_mark('start')
         self.paper.print_number(a, orientation=-1, step_by_step=step_by_step)
@@ -121,23 +127,22 @@ class AddOrSubSolver(Solver):
         else:
             self.paper.print_symbol(S.sub, orientation=-1, step_by_step=step_by_step)
             c = a - b
-            c, c_sign = self._check_sign(c)
 
         self.go_to_mark('start')
         self.move_down(2)
         self.paper.print_number(c, orientation=-1, step_by_step=step_by_step)
-        if c_sign == -1:
-                self.paper.print_symbol(S.sub, orientation=-1, step_by_step=step_by_step)
 
         if nb_dec > 0:
             result = Decimal(str(c / 10 **(nb_dec)))
+        else:
+            result = c
+
+        if nb_dec > 0 or c_sign == -1:
             self.paper.go_to_mark('start')
             self.move_down(4)
             self.print_number(result, orientation=-1, step_by_step=step_by_step)
             if c_sign == -1:
                 self.paper.print_symbol(S.sub, orientation=-1, step_by_step=step_by_step)
-        else:
-            result = c
 
         self.go_to_mark('answer')
         if c_sign == -1:
