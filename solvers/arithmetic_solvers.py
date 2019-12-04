@@ -255,6 +255,118 @@ class MultiplySolver(Solver):
         self.paper.make_step()
 
 
+class MultiplySolver2(Solver):
+    def _decimal_to_int(self, d):
+        if isinstance(d, _Decimal):
+            d = d._decimal
+            nb_decimals = abs(d.as_tuple().exponent)
+            d_int = int(d.__mul__(10 ** nb_decimals))
+            return d_int, nb_decimals
+        else:
+            return d, 0
+
+    def _check_sign(self, a, b):
+        if a < 0 and b < 0:
+            sign = 1
+            a, b = a.__neg__(), b.__neg__()
+        elif a < 0:
+            sign = -1
+            a = a.__neg__()
+        elif b < 0:
+            sign = -1
+            b = b.__neg__()
+        else:
+            sign = 1
+        return a, b, sign
+
+    def play(self, problem, verbosity=2):
+        if verbosity == 1:
+            step_by_step = False
+        elif verbosity >= 2:
+            step_by_step = True
+
+        a, b = problem.params['p'], problem.params['q']
+
+        nb_dec = 0
+        self.paper.go_to_mark('question')
+        self.move_right()
+        self.paper.print_number(a._decimal, orientation=1)
+        self.paper.print_symbol(S.product, orientation=1, attention=True)
+        self.paper.print_number(b._decimal, orientation=1)
+
+        a, a_nb_dec = self._decimal_to_int(a)
+        b, b_nb_dec = self._decimal_to_int(b)
+        nb_dec = a_nb_dec + b_nb_dec
+
+        a, b, sign = self._check_sign(a, b)
+
+        self.paper.go_to_mark('start')
+        self.paper.print_number(a, orientation=1, step_by_step=step_by_step)
+        self.paper.mark_current_pos('a_end', horizontal_offset=-1)
+        self.paper.print_symbol(S.product, orientation=1, step_by_step=step_by_step, attention=True)
+        self.paper.print_number(b, orientation=1, step_by_step=step_by_step)
+        self.paper.mark_current_pos('b_end', horizontal_offset=-1)
+
+        k_a, k_b = 0, 0
+        l = 1
+        rs = []
+        a_copy, b_copy = a, b
+
+        while b_copy != 0:
+            b_digit = b_copy % 10
+            a_copy = a
+            k_a = 0
+            while a_copy != 0:
+                a_digit = a_copy % 10
+                r = b_digit * a_digit * 10**(k_a + k_b)
+                rs.append(r)
+                # TODO set attention
+                self.paper.go_to_mark('a_end')
+                self.move_down(l + 1)
+                self.move_right(4)
+                self.paper.print_number(b_digit, orientation=-1, step_by_step=step_by_step)
+                self.paper.print_symbol(S.product, orientation=-1, step_by_step=step_by_step)
+                self.paper.print_number(a_digit, orientation=-1, step_by_step=step_by_step)
+                self.paper.print_symbol(S.eq, orientation=-1, step_by_step=step_by_step)
+
+                self.paper.go_to_mark('a_end')
+                self.move_down(l + 1)
+                self.move_left(k_a + k_b)
+                self.paper.print_number(a_digit*b_digit, orientation=-1, step_by_step=step_by_step)
+
+                a_copy = a_copy // 10
+                k_a += 1
+                l += 1
+            b_copy = b_copy // 10
+            k_b += 1
+
+        # TODO set attention
+        rsum = np.sum(rs)
+        if len(rs) > 1:
+            self.paper.print_symbol(S.add, orientation=-1, attention=True)
+            self.paper.make_step()
+            self.paper.go_to_mark('a_end')
+            self.move_down(l + 1)
+            l += 1
+            self.paper.print_number(rsum, orientation=-1, step_by_step=step_by_step, solver='AddSolver')
+
+        if nb_dec > 0:
+            result = Decimal(str(rsum / 10 **(nb_dec)))
+            self.paper.go_to_mark('a_end')
+            self.move_down(l + 2)
+            self.print_number(result, orientation=-1, step_by_step=step_by_step)
+        else:
+            result = rsum
+
+        self.go_to_mark('answer')
+        if sign == -1:
+            self.paper.print_symbol(S.sub, orientation=1)
+            self.paper.make_step()
+        self.paper.print_number(result, orientation=1, step_by_step=step_by_step)
+        self.paper.print_symbol(S.end)
+        self.paper.make_step()
+
+
 class DivisionSolver(Solver):
 
     def play(self, problem):
