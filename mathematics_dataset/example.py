@@ -26,25 +26,25 @@ import inspect
 from mathematics_dataset.util import composition
 
 from problems.arithmetic_problems import MultiplicationProblem, AddOrSubProblem
-from solvers.arithmetic_solvers import MultiplySolver, AddOrSubSolver
+from solvers.arithmetic_solvers import MultiplySolver, MultiplySolver2, AddOrSubSolver
 import display
 
 module_to_problem = {
-  #'mul': MultiplicationProblem,
-  'add_or_sub': AddOrSubProblem
+  'mul': MultiplicationProblem,
+  #'add_or_sub': AddOrSubProblem
 }
 
 
 problem_to_solver = {
-    #'MultiplicationProblem' : MultiplySolver,
-    'AddOrSubProblem': AddOrSubSolver
+    'MultiplicationProblem' : MultiplySolver2,
+    #'AddOrSubProblem': AddOrSubSolver
 }
 
 solutions = collections.defaultdict(list)
 
 def generate_solution(problem, question, name):
-  #solver = problem_to_solver['MultiplicationProblem'](40)
-  solver = problem_to_solver['AddOrSubProblem'](22)
+  solver = problem_to_solver['MultiplicationProblem'](40)
+  #solver = problem_to_solver['AddOrSubProblem'](22)
   solver.play(problem, verbosity=2)
   steps = solver.get_steps()
   solutions[name].append(steps)
