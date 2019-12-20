@@ -2,6 +2,7 @@
 
 1. step: add Problem and Solver to the dictionaries in gen_util.py
 
+```
   module_to_problem_dict = {
      ...
      'add_or_sub': problems.arithmetic_problems.AddOrSubProblem
@@ -12,6 +13,7 @@
      'AddOrSubProblem': solvers.arithmetic_solvers.AddOrSubSolver
      ...
      }
+```
 
 Here "add_or_sub" is the name of function that generates a specific problem type in mathematics_dataset.
 
