@@ -23,7 +23,7 @@ import textwrap
 
 import inspect
 import generators
-import mathematics_dataset.example as example
+#import mathematics_dataset.example as example
 
 # Dependency imports
 from absl import app
@@ -34,6 +34,22 @@ from mathematics_dataset.modules import modules
 import six
 from six.moves import range
 
+from mathematics_dataset.util import composition
+
+import display
+from gen_utils import module_to_problem, problem_to_solver, module_to_problem_dict, problem_to_solver_dict
+
+
+solutions = collections.defaultdict(list)
+
+def generate_solution(problem, question, name, display_steps_plot=False):
+    print('Generating solution on checkered paper...')
+    solver = problem_to_solver('AddOrSubProblem')(30)
+    solver.play(problem, verbosity=2)
+    steps = solver.get_steps()
+    solutions[name].append(steps)
+    if display_steps_plot:
+        display.plot_steps(steps, title=question, savefig=True)
 
 FLAGS = flags.FLAGS
 
@@ -41,6 +57,7 @@ flags.DEFINE_string('filter', '', 'restrict to matching module names')
 flags.DEFINE_integer('per_train_module', 5000, 'Num of examples per train module')
 flags.DEFINE_integer('per_test_module', 5000, 'Num of examples per test module')
 flags.DEFINE_bool('show_dropped', False, 'Whether to print dropped questions')
+flags.DEFINE_bool('display_steps_plot', False, 'Whether to display solution steps plot.')
 
 
 filtered_modules = collections.OrderedDict([])
@@ -134,8 +151,7 @@ def sample_from_module(module):
   num_dropped = 0
   while True:
     problem = module()
-    
-    question = str(problem.question)
+    question = str(problem.question.question_as_str)
     if len(question) > generate_settings.MAX_QUESTION_LENGTH:
       num_dropped += 1
       if FLAGS.show_dropped:
@@ -147,6 +163,8 @@ def sample_from_module(module):
       if FLAGS.show_dropped:
         logging.warning('Dropping question with answer: %s', answer)
       continue
+    if module.func.__name__ in module_to_problem_dict:
+        generate_solution(module_to_problem(module.func.__name__)(problem.question.params), problem.question.question_as_str, module.func.__name__, FLAGS.display_steps_plot)
     return problem, num_dropped
 
 
@@ -160,10 +178,8 @@ def main(unused_argv):
   for regime, flat_modules in six.iteritems(filtered_modules):
     per_module = counts[regime]
     for module_name, module in six.iteritems(flat_modules):
-      print(module_name)
-      if module_name not in ["arithmetic__mul", "arithmetic__mul_big", "arithmetic__add_or_sub", "arithmetic__add_or_sub_big"] :
+      if module_name not in ["arithmetic__mul", "arithmetic__mul_big", "arithmetic__add_or_sub", "arithmetic__add_or_sub_big"]:
         continue
-      example.solutions = collections.defaultdict(list)    
       # These magic print constants make the header bold.
       print('\033[1m{}/{}\033[0m'.format(regime, module_name))
       num_dropped = 0
@@ -175,9 +191,9 @@ def main(unused_argv):
         print(text)
       if num_dropped > 0:
         logging.warning('Dropped %d examples', num_dropped)
-      for module_name, module_solutions in example.solutions.items():
+      for module_name, module_solutions in solutions.items():
         records = generators.solutions_to_pairs(module_solutions)
-        generators.write_tfrecords(records, 'test1.' + module_name + "." + regime)
+        generators.write_tfrecords(records, 'test5k.' + module_name + "." + regime)
 
 if __name__ == '__main__':
   app.run(main)

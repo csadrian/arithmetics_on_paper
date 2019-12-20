@@ -93,13 +93,9 @@ class AddOrSubSolver(Solver):
         c_sign = 1
 
         if (a_sign < b_sign and b > a):
-            a_copy = a
-            a = b
-            b = a_copy
+            a, b = b, a
         elif (a_sign > b_sign and a < b):
-            a_copy = a
-            a = b
-            b = a_copy
+            a, b = b, a
             c_sign = -1
         elif (a_sign < b_sign and a > b):
             c_sign = -1
@@ -135,7 +131,7 @@ class AddOrSubSolver(Solver):
         if nb_dec > 0:
             result = Decimal(str(c / 10 **(nb_dec)))
         else:
-            result = c
+            result = Decimal(str(c))
 
         if nb_dec > 0 or c_sign == -1:
             self.paper.go_to_mark('start')
@@ -299,6 +295,9 @@ class MultiplySolver2(Solver):
         nb_dec = a_nb_dec + b_nb_dec
 
         a, b, sign = self._check_sign(a, b)
+
+        if len(str(a)) < len(str(b)):
+            a, b = b, a
 
         self.paper.go_to_mark('start')
         self.paper.print_number(a, orientation=1, step_by_step=step_by_step)

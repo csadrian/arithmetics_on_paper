@@ -19,37 +19,9 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
-import inspect
-
-
 
 from mathematics_dataset.util import composition
 
-from problems.arithmetic_problems import MultiplicationProblem, AddOrSubProblem
-from solvers.arithmetic_solvers import MultiplySolver, MultiplySolver2, AddOrSubSolver
-import display
-
-module_to_problem = {
-  'mul': MultiplicationProblem,
-  #'add_or_sub': AddOrSubProblem
-}
-
-
-problem_to_solver = {
-    'MultiplicationProblem' : MultiplySolver2,
-    #'AddOrSubProblem': AddOrSubSolver
-}
-
-solutions = collections.defaultdict(list)
-
-def generate_solution(problem, question, name):
-  solver = problem_to_solver['MultiplicationProblem'](40)
-  #solver = problem_to_solver['AddOrSubProblem'](22)
-  solver.play(problem, verbosity=2)
-  steps = solver.get_steps()
-  solutions[name].append(steps)
-
-  #display.plot_steps(steps, title=question, savefig=True)
 
 def question(context, template, **kwargs):
   """Makes a question, using the given context and template.
@@ -79,17 +51,11 @@ def question(context, template, **kwargs):
   prefix, kwargs = composition.expand_entities(context, **kwargs)
   if prefix:
     prefix += ' '
-  print(kwargs)
 
-  stack = inspect.stack()
-  for i in range(len(stack)):
-    if stack[i].function == 'sample_from_module':
-        module = stack[i-1].function
-  if module in module_to_problem:
-      generate_solution(module_to_problem[module](kwargs), prefix + template.format(**kwargs), module)
-  return prefix + template.format(**kwargs)
+  question_as_str = prefix + template.format(**kwargs)
 
+  return QuestionWithParams(question_as_str, context, kwargs)
 
 Problem = collections.namedtuple('Problem', ('question', 'answer'))
 
-
+QuestionWithParams = collections.namedtuple('QuestionWithParams', ('question_as_str', 'context', 'params'))
