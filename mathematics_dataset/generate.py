@@ -42,13 +42,13 @@ from gen_utils import module_to_problem, problem_to_solver, module_to_problem_di
 
 solutions = collections.defaultdict(list)
 
-def generate_solution(problem, question, name, display_steps_plot=False):
+def generate_solution(problem, question, name, save_plots=False):
     print('Generating solution on checkered paper...')
     solver = problem_to_solver('AddOrSubProblem')(30)
     solver.play(problem, verbosity=2)
     steps = solver.get_steps()
     solutions[name].append(steps)
-    if display_steps_plot:
+    if save_plots:
         display.plot_steps(steps, title=question, savefig=True)
 
 FLAGS = flags.FLAGS
@@ -57,7 +57,7 @@ flags.DEFINE_string('filter', '', 'restrict to matching module names')
 flags.DEFINE_integer('per_train_module', 5000, 'Num of examples per train module')
 flags.DEFINE_integer('per_test_module', 5000, 'Num of examples per test module')
 flags.DEFINE_bool('show_dropped', False, 'Whether to print dropped questions')
-flags.DEFINE_bool('display_steps_plot', False, 'Whether to display solution steps plot.')
+flags.DEFINE_bool('save_plots', False, 'Whether to display solution steps plot.')
 
 
 filtered_modules = collections.OrderedDict([])
@@ -164,7 +164,7 @@ def sample_from_module(module):
         logging.warning('Dropping question with answer: %s', answer)
       continue
     if module.func.__name__ in module_to_problem_dict:
-        generate_solution(module_to_problem(module.func.__name__)(problem.question.params), problem.question.question_as_str, module.func.__name__, FLAGS.display_steps_plot)
+        generate_solution(module_to_problem(module.func.__name__)(problem.question.params), problem.question.question_as_str, module.func.__name__, FLAGS.save_plots)
     return problem, num_dropped
 
 

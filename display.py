@@ -1,3 +1,4 @@
+import matplotlib
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
@@ -94,9 +95,10 @@ def plot_steps(steps, ncols=None, title='Solution steps on paper',
                     shape=(nrows_paper, ncols_paper))
     if savefig:
         fig.savefig(title + '.png', bbox_inches='tight')
-    #plt.clf()
-    #fig.show()
-
+    if matplotlib.get_backend() != 'Agg':
+        fig.show()
+    plt.clf()
+   
 def _mock_problem_generator(problem):
     while True:
         yield problem
