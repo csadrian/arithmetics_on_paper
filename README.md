@@ -17,6 +17,6 @@
 
 Here "add_or_sub" is the name of function that generates a specific problem type in mathematics_dataset.
 
-2. step: run the generator: python -m mathematics_dataset.generate --filter=arithmetic --save_plots=True --per_train_module=5 --per_test_module=5
+2. step: run the generator: python -m mathematics_dataset.generate --filter=arithmetic --save_plots=True --per_train_module=5 --per_test_module=5 --paper_size=40
 
 Note the options!
