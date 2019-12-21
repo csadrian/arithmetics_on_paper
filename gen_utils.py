@@ -2,7 +2,8 @@ import solvers
 import problems
 
 module_to_problem_dict = {
-    'arithmetic__add_or_sub': problems.arithmetic_problems.AddOrSubProblem
+    'arithmetic__add_or_sub': problems.arithmetic_problems.AddOrSubProblem,
+    'arithmetic__mul': problems.arithmetic_problems.MultiplicationProblem
 
 	# algebra__linear_1d
 	# algebra__linear_1d_composed
@@ -12,7 +13,7 @@ module_to_problem_dict = {
 	# algebra__polynomial_roots_composed
 	# algebra__sequence_next_term
 	# algebra__sequence_nth_term
-	# arithmetic__add_or_sub
+	## arithmetic__add_or_sub
 	# arithmetic__add_or_sub_in_base
 	# arithmetic__add_sub_multiple
 	# arithmetic__div
@@ -134,7 +135,8 @@ module_to_problem_dict = {
 
 }
 problem_to_solver_dict = {
-    'AddOrSubProblem': solvers.arithmetic_solvers.AddOrSubSolver
+    'AddOrSubProblem': solvers.arithmetic_solvers.AddOrSubSolver,
+    'MultiplicationProblem': solvers.arithmetic_solvers.MultiplySolver2
 }
 
 

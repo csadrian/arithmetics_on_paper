@@ -42,9 +42,9 @@ from gen_utils import module_to_problem, problem_to_solver, module_to_problem_di
 
 solutions = collections.defaultdict(list)
 
-def generate_solution(problem, question, name, save_plots=False):
+def generate_solution(problem, question, name, paper_size=30, save_plots=False):
     print('Generating solution on checkered paper...')
-    solver = problem_to_solver('AddOrSubProblem')(30)
+    solver = problem_to_solver(problem.__class__.__name__)(paper_size)
     solver.play(problem, verbosity=2)
     steps = solver.get_steps()
     if save_plots:
@@ -58,6 +58,7 @@ flags.DEFINE_integer('per_train_module', 5000, 'Num of examples per train module
 flags.DEFINE_integer('per_test_module', 5000, 'Num of examples per test module')
 flags.DEFINE_bool('show_dropped', False, 'Whether to print dropped questions')
 flags.DEFINE_bool('save_plots', False, 'Whether to display solution steps plot.')
+flags.DEFINE_integer('paper_size', 40, 'Size of paper.')
 
 
 filtered_modules = collections.OrderedDict([])
@@ -164,7 +165,7 @@ def sample_from_module(module, module_name):
         logging.warning('Dropping question with answer: %s', answer)
       continue
     if module_name in module_to_problem_dict:
-        steps = generate_solution(module_to_problem(module_name)(problem.question.params), problem.question.question_as_str, module.func.__name__, FLAGS.save_plots)
+        steps = generate_solution(module_to_problem(module_name)(problem.question.params), problem.question.question_as_str, module.func.__name__, paper_size=FLAGS.paper_size, save_plots=FLAGS.save_plots)
         solutions[module_name].append(steps)
     return problem, num_dropped
 
