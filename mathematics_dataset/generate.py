@@ -47,9 +47,9 @@ def generate_solution(problem, question, name, save_plots=False):
     solver = problem_to_solver('AddOrSubProblem')(30)
     solver.play(problem, verbosity=2)
     steps = solver.get_steps()
-    solutions[name].append(steps)
     if save_plots:
         display.plot_steps(steps, title=question, savefig=True)
+    return steps
 
 FLAGS = flags.FLAGS
 
@@ -137,7 +137,7 @@ def init_modules(train_split=False):
     filtered_modules[regime_] = _filter_and_flatten(modules_)
 
 
-def sample_from_module(module):
+def sample_from_module(module, module_name):
   """Samples a problem, ignoring samples with overly long questions / answers.
 
   Args:
@@ -163,8 +163,9 @@ def sample_from_module(module):
       if FLAGS.show_dropped:
         logging.warning('Dropping question with answer: %s', answer)
       continue
-    if module.func.__name__ in module_to_problem_dict:
-        generate_solution(module_to_problem(module.func.__name__)(problem.question.params), problem.question.question_as_str, module.func.__name__, FLAGS.save_plots)
+    if module_name in module_to_problem_dict:
+        steps = generate_solution(module_to_problem(module_name)(problem.question.params), problem.question.question_as_str, module.func.__name__, FLAGS.save_plots)
+        solutions[module_name].append(steps)
     return problem, num_dropped
 
 
@@ -178,19 +179,18 @@ def main(unused_argv):
   for regime, flat_modules in six.iteritems(filtered_modules):
     per_module = counts[regime]
     for module_name, module in six.iteritems(flat_modules):
-      if module_name not in ["arithmetic__mul", "arithmetic__mul_big", "arithmetic__add_or_sub", "arithmetic__add_or_sub_big"]:
-        continue
       # These magic print constants make the header bold.
       print('\033[1m{}/{}\033[0m'.format(regime, module_name))
       num_dropped = 0
       for _ in range(per_module):
-        problem, extra_dropped = sample_from_module(module)
+        problem, extra_dropped = sample_from_module(module, module_name)
         num_dropped += extra_dropped
         text = text_wrapper.fill(
             '{}  \033[92m{}\033[0m'.format(problem.question, problem.answer))
         print(text)
       if num_dropped > 0:
         logging.warning('Dropped %d examples', num_dropped)
+      
       for module_name, module_solutions in solutions.items():
         records = generators.solutions_to_pairs(module_solutions)
         generators.write_tfrecords(records, 'test5k.' + module_name + "." + regime)
