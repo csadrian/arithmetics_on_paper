@@ -5,7 +5,7 @@
 ```
   module_to_problem_dict = {
      ...
-     'add_or_sub': problems.arithmetic_problems.AddOrSubProblem
+     'arithmetic__add_or_sub': problems.arithmetic_problems.AddOrSubProblem
      ...
      }
   problem_to_solver_dict = {
