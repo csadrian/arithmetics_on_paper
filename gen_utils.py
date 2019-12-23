@@ -4,7 +4,6 @@ import problems
 module_to_problem_dict = {
     'arithmetic__add_or_sub': problems.arithmetic_problems.AddOrSubProblem,
     'arithmetic__mul': problems.arithmetic_problems.MultiplicationProblem
-
 	# algebra__linear_1d
 	# algebra__linear_1d_composed
 	# algebra__linear_2d

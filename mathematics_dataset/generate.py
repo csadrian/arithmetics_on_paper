@@ -36,7 +36,7 @@ from six.moves import range
 
 from mathematics_dataset.util import composition
 
-import display
+import plot
 from gen_utils import module_to_problem, problem_to_solver, module_to_problem_dict, problem_to_solver_dict
 
 
@@ -48,7 +48,7 @@ def generate_solution(problem, question, name, paper_size=30, save_plots=False):
     solver.play(problem, verbosity=2)
     steps = solver.get_steps()
     if save_plots:
-        display.plot_steps(steps, title=question, savefig=True)
+        plot.plot_steps(steps, title=question, savefig=True)
     return steps
 
 FLAGS = flags.FLAGS

@@ -22,5 +22,19 @@ class Solver:
             self.play(problem)
             yield self.get_steps()
 
+    def __getattribute__(self, name, recursive=False):
+        if not recursive and name == 'play':
+            return self._play
+        else:
+            return super().__getattribute__(name)
+
+    def _play(self, problem, *args, **kwargs):
+        if type(problem) != dict:
+            params = problem.params
+        else:
+            params = problem
+        return self.__getattribute__('play', recursive=True)(
+            params, *args, **kwargs)
+
     def play(self, problem):
         raise NotImplementedError

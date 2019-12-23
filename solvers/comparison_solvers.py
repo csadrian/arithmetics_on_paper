@@ -37,13 +37,18 @@ class SortSolver(Solver):
         return int(self.get_word_at_position(orientation))
 
     def play(self, problem):
-        ns = problem['ns']
+        ns = []
+        for key in problem.keys():
+            if key.startswith('entity'):
+                ns.append(problem[key])
+
+        ns = list(np.abs(ns))
 
         self.print_symbol(S.sort, orientation=0)
 
         for n in ns:
             self.move_down()
-            self.print_number(n, orientation=-1, preserve_pos=True)
+            self.print_number(np.abs(n), orientation=-1, preserve_pos=True)
 
         self.mark_current_pos('c1_last')
 
