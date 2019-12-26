@@ -5,14 +5,14 @@ from .solver import Solver
 from utils import Symbols as S
 
 
+
 class AddSolver(Solver):
 
     def play(self, problem):
-        a = problem['a']
-        b = problem['b']
-        base = problem['base']
+        p = problem['p']
+        q = problem['q']
         
-        c = a + b
+        value = p + q
 
         self.paper.print_number(a, base, orientation=-1, preserve_pos=True)
         self.move_down()
@@ -394,44 +394,52 @@ class DivisionSolver(Solver):
             self.paper.print_number(0, orientation=1)
             self.paper.make_step(solver='PaircomparisonSolver')
 
-
+#WIP
 class AddSubMultipleSolver(Solver):
 
+    #Maybe the Op itself has this feature, I didnt check fully.
+    def print_op(self, op):
+    
+        _symbols = dict((y, x), for x, y in S.visual.symbols.iteritems())
+
+        op_text = str(op)
+
+        for letter in op_text:
+            if letter.isdigit():
+                
+                self.paper.print_number(int(letter))
+
+            elif letter in _symbols.keys():
+                
+                self.paper.print_symbol(_symbols[letter])
+
+            else:
+                pass #TypeError
+
     def play(self, problem):
-        coefs = problem['coefs']
-        ops = problem['ops']
+
+        op = problem.expression
+        value = problem.value
+        
+        #Need to add header.
 
         self.paper.mark_current_pos('start')
 
-        self.paper.print_number(coefs[0], orientation=1, reset=True)
-    
+        print_op(op)
+        self.make_step()
+
+        self.paper.go_to_mark('start')
+
         self.paper.move_down()
-        self.paper.move_left()
-        
-        self.paper.mark_current_pos('margin')
-        
-        total = coefs[0]
+        self.paper.set_mark('margin')
+    
+        children = op.children
 
-        for i in range(len(coefs) - 1):
+        for child in children:
             
-            self.paper.go_to_mark('margin')
+            self.paper.print_number(child.value)
             
-            self.paper.print_number(coefs[i+1])
-            self.print_symbol(ops[i])
-
-            if ops[i] is 11:
-                self.make_step(solver='AddSolver')
-                total = total + coefs[i+1]
+            if isinstance(child, Constant):
+                self.paper.make_step()
             else:
-                self.make_step(solver='SubtractSolver')
-                total = total - coefs[i+1]
-            
-            self.paper.go_to_mark('margin')
-            self.paper.move_down()
-            self.paper.mark_current_pos('margin')
-
-            self.paper.print_number(total, reset=True, step_by_step=True)
-            
-            self.paper.go_to_mark('margin')
-            self.move_down()
-            self.mark_current_pos('margin')
+                self.paper.make_step(solver='AddSubMultipleSolver')
