@@ -71,7 +71,7 @@ class AddOrSubSolver(Solver):
         elif verbosity >= 2:
             step_by_step = True
 
-        a, b, problem_type = problem.params['p'], problem.params['q'], problem.params['problem_type']
+        a, b, problem_type = problem['p'], problem['q'], problem['problem_type']
 
         if problem_type == 'add':
             problem_sign = 1
@@ -178,7 +178,7 @@ class MultiplySolver(Solver):
         elif verbosity >= 2:
             step_by_step = True
 
-        a, b = problem.params['p'], problem.params['q']
+        a, b = problem['p'], problem['q']
 
         nb_dec = 0
         self.paper.go_to_mark('question')
@@ -281,7 +281,7 @@ class MultiplySolver2(Solver):
         elif verbosity >= 2:
             step_by_step = True
 
-        a, b = problem.params['p'], problem.params['q']
+        a, b = problem['p'], problem['q']
 
         nb_dec = 0
         self.paper.go_to_mark('question')

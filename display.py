@@ -1,109 +1,49 @@
-import matplotlib
-import seaborn as sns
-import matplotlib.pyplot as plt
 import numpy as np
-import os
-import re
-plt.style.use('seaborn-deep')
 
-import types
-from matplotlib.lines import Line2D
+from mathematics_dataset import generate
+from mathematics_dataset.modules import modules
 
-from solvers import *
-from utils import Symbols as S
+from mathematics_dataset.util.display import Decimal as _Decimal
+from sympy.core.numbers import Integer, Rational
 
-def _non_empty_subsquare_dim(array):
-    nrows, ncols = array.shape
-    for i in range(1, nrows):
-        if (array[i:, :] == 0).all() and (array[:, i:] == 0).all():
-            return i, i
-    return nrows, ncols
+import gen_utils
+from plot import *
 
-def _plot_paper(array, ax, diff=None, attention=None, shape=(15, 15)):
-    ncols, nrows = shape
+def _sampling_func_from_module(mname, entropy_args):
+    pname = mname.split('__')
+    func = modules.train(
+        generate._make_entropy_fn(*entropy_args))[pname[0]][pname[1]]
+    return func
 
-    ax.set_xlim([0, ncols])
-    ax.set_ylim([0, nrows])
-    xticks = list(range(ncols))
-    yticks = list(range(nrows))
-    xticklabels = [2*' ' + l + ' ' for l in map(str, xticks)]
-    yticklabels = [l for l in map(str, reversed(yticks))]
-    ax.set_xticks(xticks)
-    ax.set_xticklabels(xticklabels, ha='left')
-    ax.set_yticks(yticks)
-    ax.set_yticklabels(yticklabels, va='bottom')
+def sample_from_module(mname, entropy_args=(0,3)):
+    func = _sampling_func_from_module(mname, entropy_args)
+    res = func()[0]
+    return res
 
-    ax.grid(True)
-    if attention is None:
-        attention = np.zeros((ncols, nrows))
-        attention = np.random.randint(0, 2, (ncols, nrows))
-    if diff is None:
-        diff = np.zeros((ncols, nrows))
-    for i in range(nrows):
-        for j in range(ncols):
-            symbol = array[i, j]
-            fontdict = {
-                'color': 'blue',
-                'weight': 'bold',
-                'fontsize': 'large',
-            }
-            if attention[i, j] > 0.5:
-                fontdict['bbox'] = {
-                                    'color': 'red',
-                                    'alpha': 0.1
-                                    }
-            if diff[i, j]:
-                fontdict['color'] = 'green'
-            ax.text(j+0.5, ncols-(i+0.5), (S.visual(symbol)),
-                    horizontalalignment='center',
-                    verticalalignment='center',
-                    fontdict=fontdict
-                    )
-
-def plot_last_step(steps):
-    fig, ax = plt.subplots()
-    _plot_paper(steps[-1], ax)
-    fig.show()
-
-def plot_steps(steps, ncols=None, title='Solution steps on paper',
-               savefig=False, dynamic_dims=True):
-    if ncols is None:
-        ncols = 1 if len(steps) <= 2 else 2
-    nrows = int(np.ceil(len(steps)/ncols))
-    fig, axes = plt.subplots(nrows=nrows,
-                             ncols=ncols, figsize=(ncols*6,nrows*6))
-    if ncols == 1:
-        axes = np.array(axes)
-    axes = axes.flatten()
-    for ax in axes:
-        ax.axis('off')
-    if dynamic_dims:
-        step_dims = [_non_empty_subsquare_dim(step.paper) for step in steps]
-        nrows_paper = ncols_paper = np.max(step_dims)
-    else:
-        nrows_paper, ncols_paper = steps[0].paper.shape
-    for i, step in enumerate(steps):
-        step = steps[i]
-        if i > 0:
-            diff = (step['paper'] != steps[i-1]['paper'])
-        else:
-            diff = None
-        axes[i].axis('on')
-        axes[i].set_title(f"{i+1}. step:")
-        _plot_paper(step['paper'], axes[i], diff=diff,
-                    attention=step['attention'],
-                    shape=(nrows_paper, ncols_paper))
-    if savefig:
-        fig.savefig(title + '.png', bbox_inches='tight')
-    if matplotlib.get_backend() != 'Agg':
-        fig.show()
-    plt.clf()
-   
-def _mock_problem_generator(problem):
-    while True:
-        yield problem
-
-def plot_example(solver, problem, grid_size=100, ncols=None):
-    res = next(iter(solver(grid_size).generator(
-        _mock_problem_generator(problem))))
-    plot_steps(res, ncols=ncols)
+def plot_example_md(mname, Solver=False, grid_size=100,
+                    ncols=None, entropy_args=(0,1),
+                    skip_ntypes=('rational', 'decimal'),
+                    solver_kwargs=dict()):
+    ntype_map = {
+        'integer': Integer,
+        'decimal': _Decimal,
+        'rational': Rational
+    }
+    skip = [ntype_map[ntype] for ntype in skip_ntypes]
+    if Solver is False:
+        problem_name = gen_utils.module_to_problem(mname).__name__
+        Solver = gen_utils.problem_to_solver(problem_name)
+    # avoid infinite loop
+    for i in range(1000):
+        problem = sample_from_module(mname)
+        wrong_values = False
+        for value in problem.params.values():
+            if type(value) in skip:
+                wrong_values = True
+                break
+        if not wrong_values:
+            break
+    solver = Solver(grid_size, **solver_kwargs)
+    solver.play(problem)
+    steps = solver.get_steps()
+    plot_steps(steps, ncols)
