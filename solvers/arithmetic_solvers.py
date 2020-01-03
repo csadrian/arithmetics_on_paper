@@ -400,7 +400,7 @@ class AddSubMultipleSolver(Solver):
     #Maybe the Op itself has this feature, I didnt check fully.
     def print_op(self, op):
     
-        _symbols = dict((y, x), for x, y in S.visual.symbols.iteritems())
+        _symbols = dict((y, x) for x, y in S.visual.symbols.iteritems())
 
         op_text = str(op)
 

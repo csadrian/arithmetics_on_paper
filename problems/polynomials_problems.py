@@ -17,7 +17,7 @@ class TwoPolynomialProblem(Problem):
         return {'a' : sum([(x ** i) * np.random.randint(self.lim[i][0], self.lim[i][1]) for i in range(len(self.lim))]),
                 'b' : sum([(x ** i) * np.random.randint(self.lim[i][0], self.lim[i][1]) for i in range(len(self.lim))])}
 
-class SinglePolynomialProblem(Prolem)
+class SinglePolynomialProblem(Problem):
 
     def __init__(self, lim, mult=False):
         self.mult = mult
