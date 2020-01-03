@@ -127,7 +127,7 @@ def write_tfrecords(records, name):
       serialized = example.SerializeToString()
       writer.write(serialized)
 
-def read_tfrecord(serialized_example, grid_size):
+def read_tfrecord(serialized_example):
     feature_description = {
         'w': tf.io.FixedLenFeature([], tf.int64),
         'h': tf.io.FixedLenFeature([], tf.int64),
@@ -160,8 +160,10 @@ def dataset_from_tfrecords(file_paths):
 def sup_dataset_from_tfrecords(file_paths):
     dataset = dataset_from_tfrecords(file_paths)
     return dataset.map(lambda r: (
-        tf.sparse.to_dense(tf.sparse.SparseTensor(indices=tf.concat(r['paper_idx_0'],  r['paper_idx_1'],  axis=1), values=r['paper_values'], dense_shape=(r['w'], r['h']))),
-        tf.sparse.to_dense(tf.sparse.SparseTensor(indices=tf.concat(r['target_idx_0'], r['target_idx_1'], axis=1), values=r['target_values'], dense_shape=(r['w'], r['h'])))
+        tf.sparse.to_dense(tf.sparse.SparseTensor(indices=tf.stack([tf.sparse_tensor_to_dense(r['paper_idx_0']),  tf.sparse_tensor_to_dense(r['paper_idx_1'])],  axis=1), values=tf.sparse_tensor_to_dense(r['paper_values']), dense_shape=(r['w'], r['h']))),
+        tf.sparse.to_dense(tf.sparse.SparseTensor(indices=tf.stack([tf.sparse_tensor_to_dense(r['target_idx_0']), tf.sparse_tensor_to_dense(r['target_idx_1'])], axis=1), values=tf.sparse_tensor_to_dense(r['target_values']), dense_shape=(r['w'], r['h'])))
+        #tf.sparse.to_dense(tf.sparse.SparseTensor(indices=tf.stack([r['paper_idx_0'], r['paper_idx_1']],  axis=1), values=tf.sparse_tensor_to_dense(r['paper_values']), dense_shape=(r['w'], r['h']))),
+        #tf.sparse.to_dense(tf.sparse.SparseTensor(indices=tf.stack([r['target_idx_0'],r['target_idx_1']], axis=1), values=tf.sparse_tensor_to_dense(r['target_values']), dense_shape=(r['w'], r['h'])))
     ))
     #return dataset.map(lambda r: (tf.reshape(r['paper'], (r['w'], r['h'])), tf.reshape(r['target'], (r['w'], r['h']))))
 

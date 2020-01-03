@@ -25,7 +25,7 @@ print(args)
 
 tf.compat.v1.enable_eager_execution()
 
-GRID_SIZE = 22
+GRID_SIZE = 40
 
 dataset_prefix = os.path.join(args.dataset_path, args.dataset)
 
