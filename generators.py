@@ -3,6 +3,7 @@ import random
 import tensorflow as tf
 import tensorflow.keras.layers as layers
 import problems, solvers
+import functools
 
 
 def generate_with_generators(generators, N, grid_size):
@@ -115,20 +116,37 @@ def write_tfrecords(records, name):
           'sol_no': tf.train.Feature(int64_list=tf.train.Int64List(value=[record['sol_no']])),
       }
       for key in ['paper', 'attention', 'target']:
-          feature_kvps[key] = tf.train.Feature(int64_list=tf.train.Int64List(value=record[key].ravel()))
+          indices = np.nonzero(record[key])
+          values = record[key][indices]
+          feature_kvps[key+'_idx_0'] = tf.train.Feature(int64_list=tf.train.Int64List(value=indices[:][0]))
+          feature_kvps[key+'_idx_1'] = tf.train.Feature(int64_list=tf.train.Int64List(value=indices[:][1]))
+          feature_kvps[key+'_values'] = tf.train.Feature(int64_list=tf.train.Int64List(value=values))
 
       features = tf.train.Features(feature=feature_kvps)
       example = tf.train.Example(features=features)
       serialized = example.SerializeToString()
       writer.write(serialized)
 
-def read_tfrecord(serialized_example):
+def read_tfrecord(serialized_example, grid_size):
     feature_description = {
         'w': tf.io.FixedLenFeature([], tf.int64),
         'h': tf.io.FixedLenFeature([], tf.int64),
-        'paper': tf.io.FixedLenSequenceFeature(shape=[], dtype=tf.int64, allow_missing=True),
-        'attention': tf.io.FixedLenSequenceFeature(shape=[], dtype=tf.int64, allow_missing=True),
-        'target': tf.io.FixedLenSequenceFeature(shape=[], dtype=tf.int64, allow_missing=True),
+
+        'paper_idx_0': tf.io.VarLenFeature(dtype=tf.int64),
+        'paper_idx_1': tf.io.VarLenFeature(dtype=tf.int64),
+        'paper_values': tf.io.VarLenFeature(dtype=tf.int64),
+
+        'attention_idx_0': tf.io.VarLenFeature(dtype=tf.int64),
+        'attention_idx_1': tf.io.VarLenFeature(dtype=tf.int64),
+        'attention_values': tf.io.VarLenFeature(dtype=tf.int64),
+
+        'target_idx_0': tf.io.VarLenFeature(dtype=tf.int64),
+        'target_idx_1': tf.io.VarLenFeature(dtype=tf.int64),
+        'target_values': tf.io.VarLenFeature(dtype=tf.int64),
+
+        #'paper': tf.io.FixedLenSequenceFeature(shape=[], dtype=tf.int64, allow_missing=True),
+        #'attention': tf.io.FixedLenSequenceFeature(shape=[], dtype=tf.int64, allow_missing=True),
+        #'target': tf.io.FixedLenSequenceFeature(shape=[], dtype=tf.int64, allow_missing=True),
         'step': tf.io.FixedLenFeature([], tf.int64),
     }
     example = tf.io.parse_single_example(serialized_example, feature_description)
@@ -141,7 +159,11 @@ def dataset_from_tfrecords(file_paths):
 
 def sup_dataset_from_tfrecords(file_paths):
     dataset = dataset_from_tfrecords(file_paths)
-    return dataset.map(lambda r: (tf.reshape(r['paper'], (r['w'], r['h'])), tf.reshape(r['target'], (r['w'], r['h']))))
+    return dataset.map(lambda r: (
+        tf.sparse.to_dense(tf.sparse.SparseTensor(indices=tf.concat(r['paper_idx_0'],  r['paper_idx_1'],  axis=1), values=r['paper_values'], dense_shape=(r['w'], r['h']))),
+        tf.sparse.to_dense(tf.sparse.SparseTensor(indices=tf.concat(r['target_idx_0'], r['target_idx_1'], axis=1), values=r['target_values'], dense_shape=(r['w'], r['h'])))
+    ))
+    #return dataset.map(lambda r: (tf.reshape(r['paper'], (r['w'], r['h'])), tf.reshape(r['target'], (r['w'], r['h']))))
 
 if __name__ == "__main__":
     generate_dataset_test()
