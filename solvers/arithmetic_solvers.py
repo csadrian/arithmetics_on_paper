@@ -11,7 +11,7 @@ class AddSolver(Solver):
     def play(self, problem):
         p = problem['p']
         q = problem['q']
-        
+
         value = p + q
 
         self.paper.print_number(a, base, orientation=-1, preserve_pos=True)

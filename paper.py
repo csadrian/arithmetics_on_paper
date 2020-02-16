@@ -13,6 +13,7 @@ class Step:
     def __getitem__(self, key):
         return getattr(self, key)
 
+
 def print_func(func):
     def inner(*args, **kwargs):
         self = args[0]
@@ -23,6 +24,7 @@ def print_func(func):
             self._set_position(x, y)
         return res
     return inner
+
 
 def reset_arg(func):
     def inner(*args, **kwargs):
@@ -124,8 +126,8 @@ class PaperWithNumbers:
         self.remove_attention(self._marked_ranges[name])
 
     def mark_current_pos(self, name, vertical_offset=0, horizontal_offset=0):
-        self._mark_cell(name,
-                        (self._x + vertical_offset, self._y + horizontal_offset))
+        self._mark_cell(
+            name, (self._x + vertical_offset, self._y + horizontal_offset))
 
     @reset_arg
     def set_attention_current_pos(self):
@@ -178,8 +180,8 @@ class PaperWithNumbers:
 
     @print_func
     @reset_arg
-    def print_number(self, n, b=10, step_by_step=False, attention=False, 
-                      orientation=-1, mark_pos=False, solver=None, 
+    def print_number(self, n, b=10, step_by_step=False, attention=False,
+                     orientation=-1, mark_pos=False, solver=None,
                      check_emptiness=True):
         x, y = self._x, self._y
         print(n)
@@ -188,9 +190,10 @@ class PaperWithNumbers:
             negative = True
             n = n * -1
         if orientation == 1 and negative:
-            self.print_symbol(S.sub, orientation=orientation, step_by_step=step_by_step)
+            self.print_symbol(S.sub, orientation=orientation,
+                              step_by_step=step_by_step)
         if isinstance(n, decimal.Decimal) and '.' in str(n):
-            integer_str, fractional_str = [item for item in str(n).split('.')]
+            integer_str, fractional_str = str(n).split('.')
             if orientation == -1:
                 part1, part2 = fractional_str[::-1], integer_str[::-1]
             else:
@@ -228,7 +231,8 @@ class PaperWithNumbers:
                 self._mark_range(mark_pos, res)
             self._set_position(x, y+orientation*len(n_in_base))
         if orientation == -1 and negative:
-            self.print_symbol(S.sub, orientation=orientation, step_by_step=step_by_step)
+            self.print_symbol(S.sub, orientation=orientation,
+                              step_by_step=step_by_step)
 
     @reset_arg
     def set_attention(self, points):
@@ -243,7 +247,7 @@ class PaperWithNumbers:
         self._y = self._y + n
 
     def move_down(self, n=1):
-        self._x = self._x + n 
+        self._x = self._x + n
 
     def move_left(self, n=1):
         return self.move_right(-1*n)
@@ -282,7 +286,6 @@ class PaperWithNumbers:
             self.delete_symbol_at_point()
             self.move_right(orientation)
         self.go_to_mark('tmp')
-
 
     def get_number_at_position(self, orientation=-1, accept_empty=True):
         word = self._get_word_at_position(orientation)
