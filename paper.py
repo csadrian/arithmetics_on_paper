@@ -184,7 +184,6 @@ class PaperWithNumbers:
                      orientation=-1, mark_pos=False, solver=None,
                      check_emptiness=True):
         x, y = self._x, self._y
-        print(n)
         negative = False
         if n < 0:
             negative = True
