@@ -2,6 +2,9 @@ def number_to_base(n, b=10):
     if n == 0:
         return [0]
     digits = []
+    if n < 0:
+        digits.append('-')
+        n *= -1
     while n:
         digits.append(int(n % b))
         n //= b
