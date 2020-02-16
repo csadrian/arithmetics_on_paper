@@ -182,45 +182,53 @@ class PaperWithNumbers:
                       orientation=-1, mark_pos=False, solver=None, 
                      check_emptiness=True):
         x, y = self._x, self._y
+        print(n)
+        negative = False
         if n < 0:
-            self.print_symbol(S.sub, orientation=1, step_by_step=step_by_step)
-            n = n.__mul__(-1)
-        if isinstance(n, decimal.Decimal) and len(str(n).split('.')) == 2:
+            negative = True
+            n = n * -1
+        if orientation == 1 and negative:
+            self.print_symbol(S.sub, orientation=orientation, step_by_step=step_by_step)
+        if isinstance(n, decimal.Decimal) and '.' in str(n):
             integer_str, fractional_str = [item for item in str(n).split('.')]
-            if orientation < 0:
+            if orientation == -1:
                 part1, part2 = fractional_str[::-1], integer_str[::-1]
             else:
                 part1, part2 = integer_str, fractional_str
             for letter in part1:
-                self.print_symbol(int(letter) + 1, step_by_step, attention, orientation, mark_pos)
-            self.print_symbol(S.decimal, step_by_step, attention, orientation, mark_pos)
+                self.print_symbol(int(letter) + 1, step_by_step, attention,
+                                  orientation, mark_pos)
+            self.print_symbol(S.decimal, step_by_step, attention, orientation,
+                              mark_pos)
             for letter in part2:
-                self.print_symbol(int(letter) + 1, step_by_step, attention, orientation, mark_pos)
-            return
+                self.print_symbol(int(letter) + 1, step_by_step, attention,
+                                  orientation, mark_pos)
         elif isinstance(n, decimal.Decimal) and str(n).isdigit():
             integer_str = str(n)
             for letter in integer_str:
-                self.print_symbol(int(letter) + 1, step_by_step, attention, orientation, mark_pos)
-            return
-
-        n_in_base = number_to_base(n, b)
-        if orientation > 0:
-            n_in_base.reverse()
-        for i in range(len(n_in_base)):
-            offset = i * orientation
-            if check_emptiness:
-                self._check_cell_emptiness((x, y + offset))
-            self.paper[x, y + offset] = n_in_base[-(i+1)] + 1
-            if attention:
-                self.attention[x, y + offset] = 1
-            if step_by_step:
-                self.make_step(solver=solver)
-        if mark_pos:
-            res = []
+                self.print_symbol(int(letter) + 1, step_by_step, attention,
+                                  orientation, mark_pos)
+        else:
+            n_in_base = number_to_base(n, b)
+            if orientation > 0:
+                n_in_base.reverse()
             for i in range(len(n_in_base)):
-                res.append((x, y+orientation*i))
-            self._mark_range(mark_pos, res)
-        self._set_position(x, y+orientation*len(n_in_base))
+                offset = i * orientation
+                if check_emptiness:
+                    self._check_cell_emptiness((x, y + offset))
+                self.paper[x, y + offset] = n_in_base[-(i+1)] + 1
+                if attention:
+                    self.attention[x, y + offset] = 1
+                if step_by_step:
+                    self.make_step(solver=solver)
+            if mark_pos:
+                res = []
+                for i in range(len(n_in_base)):
+                    res.append((x, y+orientation*i))
+                self._mark_range(mark_pos, res)
+            self._set_position(x, y+orientation*len(n_in_base))
+        if orientation == -1 and negative:
+            self.print_symbol(S.sub, orientation=orientation, step_by_step=step_by_step)
 
     @reset_arg
     def set_attention(self, points):
