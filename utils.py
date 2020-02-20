@@ -56,7 +56,7 @@ class Symbols:
             cls.percentage: '%',
             cls.gcd: 'gcd',
             cls.lcm: 'lcm',
-            cls.leftbracket : '(',
+            cls.leftbracket: '(',
             cls.rightbracket: ')'
         }
         for i in range(1, 11):
@@ -81,8 +81,6 @@ def int_to_base(n, b=10):
     return digits[::-1]
 
 def number_to_symbols(n):
-    if n == 0:
-        return [0]
     digits = []
     if n < 0:
         digits.append(Symbols.sub)
@@ -95,7 +93,7 @@ def number_to_symbols(n):
         digits.append(Symbols.decimal)
         digits += part2
     else:
-        digits = int_to_base(n)
+        digits += int_to_base(n)
     return Symbols.digits_to_symbols(digits)
 
 def is_prime(x):
