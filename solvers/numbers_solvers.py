@@ -1,13 +1,13 @@
 import numpy as np
 from .solver import Solver
-from utils import number_to_base, is_prime, primes_lt, Symbols as S
+from utils import int_to_base, is_prime, primes_lt, Symbols as S
 
 
 class BaseConversionSolver(Solver):
 
     def _print_number_in_base(self, num, base, **kwargs):
-        num_in_base = [int(digit) + 1 for digit in number_to_base(num, base)]
-        self.print_symbols_ltr(num_in_base, **kwargs)
+        num_in_base = [int(digit) + 1 for digit in int_to_base(num, base)]
+        self.print_symbols(num_in_base, **kwargs)
 
     def play(self, problem):
         # TODO: only works with b2=10!!
@@ -15,8 +15,8 @@ class BaseConversionSolver(Solver):
         b1 = problem['b1']
         b2 = problem['b2']
 
-        num_in_b1 = number_to_base(n, b1)
-        num_in_b2 = number_to_base(n, b2)
+        num_in_b1 = int_to_base(n, b1)
+        num_in_b2 = int_to_base(n, b2)
 
         self._print_number_in_base(n, b1, attention=True, mark_pos='num',
                                    orientation=1)
@@ -251,7 +251,7 @@ class FactorizeSolver(Solver):
                 self.move_down(j+1)
                 self.move_right()
                 self.paper.print_number(a, orientation=-1, attention=True)
-                self.paper.print_symbols_ltr(
+                self.paper.print_symbols(
                     [S.div],
                     orientation=-1, attention=True, reset=True)
                 self.paper.print_number(factor, orientation=-1, attention=True)

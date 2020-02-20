@@ -1,34 +1,5 @@
-def number_to_base(n, b=10):
-    if n == 0:
-        return [0]
-    digits = []
-    if n < 0:
-        digits.append('-')
-        n *= -1
-    while n:
-        digits.append(int(n % b))
-        n //= b
-    return digits[::-1]
-
-def is_prime(x):
-        if x < 2:
-            return False
-        else:
-            for n in range(2, x):
-                if x % n == 0:
-                   return False
-            return True
-
-def primes_lt(n):
-    n = int(n) + 1
-    res = []
-    for i in range(1, n):
-        if is_prime(i):
-            res.append(i)
-    return res
-
 class Symbols:
-    NUM_SYMBOLS=33
+    NUM_SYMBOLS = 38
 
     add = 11
     sub = 12
@@ -91,3 +62,56 @@ class Symbols:
         for i in range(1, 11):
             symbols[i] = str(i-1)
         return symbols.get(n, '?')
+
+    @classmethod
+    def digits_to_symbols(cls, digits):
+        digits = list(digits)
+        for i, digit in enumerate(digits):
+            if digit in range(0, 10):
+                digits[i] = digit + 1
+        return digits
+
+def int_to_base(n, b=10):
+    if n == 0:
+        return [0]
+    digits = []
+    while n:
+        digits.append(int(n % b))
+        n //= b
+    return digits[::-1]
+
+def number_to_symbols(n):
+    if n == 0:
+        return [0]
+    digits = []
+    if n < 0:
+        digits.append(Symbols.sub)
+        n *= -1
+    if '.' in str(n):
+        integer_str, fractional_str = str(n).split('.')
+        part1, part2 = int_to_base(int(integer_str)),\
+            int_to_base(int(fractional_str))
+        digits += part1
+        digits.append(Symbols.decimal)
+        digits += part2
+    else:
+        digits = int_to_base(n)
+    return Symbols.digits_to_symbols(digits)
+
+def is_prime(x):
+        if x < 2:
+            return False
+        else:
+            for n in range(2, x):
+                if x % n == 0:
+                   return False
+            return True
+
+def primes_lt(n):
+    n = int(n) + 1
+    res = []
+    for i in range(1, n):
+        if is_prime(i):
+            res.append(i)
+    return res
+

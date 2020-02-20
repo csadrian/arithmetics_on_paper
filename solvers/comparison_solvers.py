@@ -1,6 +1,6 @@
 import numpy as np
 from .solver import Solver
-from utils import number_to_base, Symbols as S
+from utils import number_to_symbols, Symbols as S
 
 
 class PaircomparisonSolver(Solver):
@@ -31,7 +31,7 @@ class SortSolver(Solver):
 
     def longest_decimal(self, ns):
 
-        lens = [len(number_to_base(n)) for n in ns]
+        lens = [len(number_to_symbols(n)) for n in ns]
         return np.max(lens)
 
     def get_number_at_position(self, orientation=-1):
