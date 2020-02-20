@@ -30,7 +30,6 @@ class PaircomparisonSolver(Solver):
 class SortSolver(Solver):
 
     def longest_decimal(self, ns):
-
         lens = [len(number_to_symbols(n)) for n in ns]
         return np.max(lens)
 
@@ -75,12 +74,10 @@ class SortSolver(Solver):
         self.move_down()
         self.mark_current_pos('c1_first')
 
-        while ns:
-            min = np.min(ns)
-            del ns[ns.index(min)]
+        ns_sorted = sorted(ns)
+
+        for i, n in enumerate(ns_sorted):
             self.go_to_mark('c2_first')
-            self.print_number(min, attention=True, reset=True)
-            self.go_to_mark('c2_first')
-            self.move_down()
-            self.mark_current_pos('c2_first')
+            self.move_down(i)
+            self.print_number(n, preserve_pos=True, orientation=-1)
             self.make_step()
