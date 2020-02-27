@@ -54,8 +54,7 @@ class HardMultiplicationProblem(MultiplicationProblem):
 
 
 class DivisionProblem(BinaryOperationProblem):
-    order = 20
-    def __init__(self):
-        super().__init__(1000, 1000)
+    pass
+
 
 __all__=['DivisionProblem']

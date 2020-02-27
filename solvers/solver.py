@@ -1,4 +1,5 @@
 from paper import PaperWithNumbers
+from utils import Symbols as S
 
 
 class Solver:
@@ -38,3 +39,38 @@ class Solver:
 
     def play(self, problem):
         raise NotImplementedError
+
+    def _print_question(self, a, problem_symbol, b=None):
+        self.paper.go_to_mark('question')
+        self.move_right()
+        self.paper.print_number(a, orientation=1)
+        self.paper.print_symbol(problem_symbol, orientation=1, attention=True)
+        if b is not None:
+            self.paper.print_number(b, orientation=1)
+        self.paper.make_step()
+
+    def _print_answer(self, value, step_by_step):
+        self.go_to_mark('answer')
+        self.paper.print_number(value, orientation=1, step_by_step=step_by_step)
+        self.paper.print_symbol(S.end)
+        self.paper.make_step()
+
+    def _set_step_by_step(self, verbosity):
+        if verbosity >= 2:
+            return True
+        else:
+            return False
+
+    def _check_sign(self, a, b):
+        if a < 0 and b < 0:
+            sign = 1
+            a, b = a.__neg__(), b.__neg__()
+        elif a < 0:
+            sign = -1
+            a = a.__neg__()
+        elif b < 0:
+            sign = -1
+            b = b.__neg__()
+        else:
+            sign = 1
+        return a, b, sign

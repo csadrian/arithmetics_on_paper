@@ -3,7 +3,8 @@ import problems
 
 module_to_problem_dict = {
     'arithmetic__add_or_sub': problems.arithmetic_problems.AddOrSubProblem,
-    'arithmetic__mul': problems.arithmetic_problems.MultiplicationProblem
+    'arithmetic__mul': problems.arithmetic_problems.MultiplicationProblem,
+    'arithmetic__div': problems.arithmetic_problems.DivisionProblem
 	# algebra__linear_1d
 	# algebra__linear_1d_composed
 	# algebra__linear_2d
@@ -15,7 +16,7 @@ module_to_problem_dict = {
 	## arithmetic__add_or_sub
 	# arithmetic__add_or_sub_in_base
 	# arithmetic__add_sub_multiple
-	# arithmetic__div
+
 	# arithmetic__mixed
 	# arithmetic__mul
 	# arithmetic__mul_div_multiple
@@ -135,7 +136,8 @@ module_to_problem_dict = {
 }
 problem_to_solver_dict = {
     'AddOrSubProblem': solvers.arithmetic_solvers.AddOrSubSolver,
-    'MultiplicationProblem': solvers.arithmetic_solvers.MultiplySolver2
+    'MultiplicationProblem': solvers.arithmetic_solvers.MultiplySolver2,
+    'DivisionProblem': solvers.arithmetic_solvers.BasicDivisionSolver
 }
 
 

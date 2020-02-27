@@ -3,7 +3,7 @@ from decimal import Decimal
 from mathematics_dataset.util.display import Decimal as _Decimal
 from .solver import Solver
 from utils import Symbols as S
-
+import math
 
 
 class AddSolver(Solver):
@@ -366,33 +366,128 @@ class MultiplySolver2(Solver):
         self.paper.make_step()
 
 
-class DivisionSolver(Solver):
+class BasicDivisionSolver(Solver):
 
-    def play(self, problem):
-        a, b = problem['a'], problem['b']
-        self.paper.print_number(a, orientation=1)
-        self.paper.mark_current_pos('a_end', horizontal_offset=-1)
-        self.paper.print_symbol(S.div, attention=True)
-        self.paper.print_number(b, orientation=1)
-        self.paper.mark_current_pos('b_end', horizontal_offset=-1)
-        self.paper.print_symbol(S.eq, attention=False)
-        self.paper.mark_current_pos('result_start')
+    def play(self, problem, verbosity=2):
+
+        step_by_step = self._set_step_by_step(verbosity)
+
+        a, b = problem['p'], problem['q']
+        self._print_question(a, S.div, b)
+
+        a, b, sign = self._check_sign(a, b)
+        self.paper.go_to_mark('start')
+        self.paper.print_number(a, orientation=1, step_by_step=step_by_step)
+        self.paper.print_symbol(S.div, orientation=1, step_by_step=step_by_step)
+        self.paper.print_number(b, orientation=1, step_by_step=step_by_step)
+
+        self.paper.print_symbol(S.eq)
+        self.paper.mark_current_pos('result_next_digit')
         self.paper.make_step()
 
-        k = 1
-        a_part = 0
-        while a_part < b and a_part < a:
-            #TODO set attention
+        self.paper.go_to_mark('start')
+        self.paper.mark_current_pos('start', vertical_offset=1)
+
+        dividend, remainder = 0, 0
+        result, a_part_str = '', ''
+        a_str = str(a)
+
+        while len(a_str) > 0:
+            k = 0
+            while dividend < b and k <= len(a_str):
+                a_part_str = a_str[:k+1]
+                k += 1
+                dividend = int(str(remainder) + a_part_str)
+
+                self.paper.go_to_mark('start')
+                self.paper.print_number(dividend, orientation=1, step_by_step=step_by_step, solver='PaircomparisonSolver')
+                self.paper.mark_current_pos('end', horizontal_offset=-1)
+                self.paper.go_to_mark('start')
+                self.paper.mark_current_pos('start', vertical_offset=1)
+
+                if dividend < b and len(result) > 0:
+                    result = result + '0'
+                    self.paper.go_to_mark('result_next_digit')
+                    self.paper.print_number(0, orientation=1, step_by_step=step_by_step, solver='PaircomparisonSolver')
+                    self.paper.mark_current_pos('result_next_digit')
+
+            result_next_digit = dividend // b
+            result += str(result_next_digit)
+            product = result_next_digit * b
+            remainder = dividend - product
+            dividend = remainder
+            a_str = a_str[k:]
+            a_part = ''
+
+            self.paper.go_to_mark('result_next_digit')
+            self.paper.print_number(result_next_digit, orientation=1, step_by_step=step_by_step)
+            self.paper.mark_current_pos('result_next_digit')
+
+            self.paper.go_to_mark('end')
+            self.move_down()
+            self.paper.print_number(product, orientation=-1, step_by_step=step_by_step, solver='MultiplySolver')
+            self.paper.print_symbol(S.sub, orientation=-1, step_by_step=step_by_step)
+
+            self.paper.go_to_mark('end')
+            self.move_down(2)
+            self.mark_current_pos('end')
+            self.paper.print_number(remainder, orientation=-1, step_by_step=step_by_step, solver='SubSolver')
+            self.paper.mark_current_pos('start', vertical_offset=1, horizontal_offset=1)
+
+        final_result = sign * int(result)
+        self._print_answer(final_result, step_by_step)
+
+class DivisionSolver(Solver):
+
+    def play(self, problem, verbosity=2):
+
+        step_by_step = self._set_step_by_step(verbosity)
+
+        a, b = problem['p'], problem['q']
+        self._print_question(a, S.div, b)
+
+        a, b, sign = self._check_sign(a, b)
+
+        if a%b == 0:
+            BasicDivisionSolver.play(self, problem, verbosity) # is this going to work actually?
+        else:
+            gcd = math.gcd(a, b)
+            numerator = a // gcd
+            denominatoor = b // gcd
             self.paper.go_to_mark('start')
-            self.move_down(k)
-            a_part = int(str(a)[:k])
-            k+=1
-            self.paper.print_number(a_part, orientation=1)
-            self.paper.make_step(solver='PaircomparisonSolver')
-        if a_part < b:
-            self.paper.go_to_mark('result_start')
-            self.paper.print_number(0, orientation=1)
-            self.paper.make_step(solver='PaircomparisonSolver')
+            self.paper.print_symbol(S.gcd, orientation=1, step_by_step=step_by_step)
+            self.paper.print_symbol(S.leftbracket, orientation=1, step_by_step=step_by_step)
+            self.paper.print_number(a, orientation=1, step_by_step=step_by_step)
+            self.paper.print_symbol(S.comma, orientation=1, step_by_step=step_by_step)
+            self.paper.print_number(b, orientation=1, step_by_step=step_by_step)
+            self.paper.print_symbol(S.rightbracket, orientation=1, step_by_step=step_by_step)
+            self.paper.print_symbol(S.eq)
+            self.paper.print_number(gcd, orientation=1, step_by_step=step_by_step, solver='GCDSolver')
+
+            self.paper.go_to_mark('start')
+            self.move_down(2)
+            self.paper.print_number(a, orientation=1, step_by_step=step_by_step)
+            self.paper.print_symbol(S.div, orientation=1, step_by_step=step_by_step)
+            self.paper.print_number(gcd, orientation=1, step_by_step=step_by_step)
+            self.paper.print_symbol(S.eq)
+            self.paper.print_number(numerator, orientation=1, step_by_step=step_by_step, solver='BasicDivisionSolver')
+
+            self.paper.go_to_mark('start')
+            self.move_down(4)
+            self.paper.print_number(b, orientation=1, step_by_step=step_by_step)
+            self.paper.print_symbol(S.div, orientation=1, step_by_step=step_by_step)
+            self.paper.print_number(gcd, orientation=1, step_by_step=step_by_step)
+            self.paper.print_symbol(S.eq)
+            self.paper.print_number(denominator, orientation=1, step_by_step=step_by_step, solver='BasicDivisionSolver')
+
+            self.paper.go_to_mark('start')
+            self.move_down(6)
+            self.paper.print_number(numerator, orientation=1, step_by_step=step_by_step)
+            self.paper.print_symbol(S.div, orientation=1, step_by_step=step_by_step)
+            self.paper.print_number(denominator, orientation=1, step_by_step=step_by_step)
+
+            final_result = sign * int(result)
+            self._print_answer(final_result, step_by_step)
 
 #WIP
 class AddSubMultipleSolver(Solver):
